@@ -10,4 +10,9 @@
     <ProjectReference Include="..\LogicaNegocio\LogicaNegocio.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Entities\" />
+    <Folder Include="Enums\" />
+  </ItemGroup>
+
 </Project>
