@@ -100,6 +100,17 @@ namespace API
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
             builder.Services.AddOpenApi();
 
+            //CORS
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("PermitirTodosOrigenes", policy =>
+                {
+                    policy.AllowAnyOrigin()
+                          .AllowAnyMethod()
+                          .AllowAnyHeader();
+                });
+            });
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -111,6 +122,7 @@ namespace API
             }
 
             app.UseHttpsRedirection();
+            app.UseCors("PermitirTodosOrigenes");
             app.UseAuthentication();
             app.UseAuthorization();
 

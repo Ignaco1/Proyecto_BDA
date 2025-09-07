@@ -14,7 +14,6 @@ namespace Infraestructura.Data
         public DbSet<Cliente> Clientes { get; set; }
         public DbSet<Reserva> Reservas { get; set; }
         public DbSet<Cancelacion> Cancelaciones { get; set; }
-        public DbSet<Pago> Pagos { get; set; }
         public DbSet<Usuario> Usuarios { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -31,18 +30,6 @@ namespace Infraestructura.Data
                 entity.Property(e => e.ImagenUrl).HasMaxLength(600);
             });
 
-            modelBuilder.Entity<Pago>(entity =>
-            {
-                entity.HasKey(e => e.Id);
-                entity.Property(e => e.MetodoPago).IsRequired().HasMaxLength(50);
-                entity.Property(e => e.IdTransaccion).IsRequired().HasMaxLength(100);
-                entity.Property(e => e.Fecha).IsRequired();
-                entity.Property(e => e.Total).IsRequired().HasColumnType("decimal(18,2)");
-                entity.HasOne(e => e.Reserva)
-                      .WithMany()
-                      .HasForeignKey(e => e.IdReserva)
-                      .OnDelete(DeleteBehavior.Cascade);
-            });
 
             modelBuilder.Entity<Usuario>(entity =>
             {
