@@ -1,39 +1,79 @@
 ﻿@inherits LayoutComponentBase
-<MudThemeProvider />
+@using MudBlazor
+
+<MudThemeProvider Theme="@VitaTheme" />
 <MudPopoverProvider />
 <MudDialogProvider />
 <MudSnackbarProvider />
 
 <MudLayout>
-    <MudAppBar Elevation="1" Style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+
+    <!-- AppBar fijo -->
+    <MudAppBar Elevation="2" Dense="true" Class="appbar-vita">
         <MudIconButton Icon="@Icons.Material.Filled.Menu"
                        Color="Color.Inherit"
                        Edge="Edge.Start"
-                       OnClick="@((e) => DrawerToggle())" />
-        <MudIcon Icon="@Icons.Material.Filled.Business" Style="margin-right: 8px;" />
-        <MudText Typo="Typo.h6" Style="color: white;">Vita Stays</MudText>
+                       OnClick="@(()=> _drawerOpen = !_drawerOpen)" />
+        <MudImage Src="images/vita-logo.png" Alt="Vita Stays" Height="28" Class="mr-2" />
+        <MudText Typo="Typo.h6" Class="text-appbar">Vita Stays</MudText>
         <MudSpacer />
-        <MudText Typo="Typo.body1" Style="color: white; margin-right: 16px;">
-            @* <AuthLinks/> *@
-        </MudText>       
+        <!-- En este paso no hay auth: simples links -->
+        <MudNavLink Href="/perfil" Icon="@Icons.Material.Filled.Person" Class="text-appbar mr-3">
+            Perfil
+        </MudNavLink>
+        <MudNavLink Href="/salir" Icon="@Icons.Material.Filled.ExitToApp" Class="text-appbar">
+            Salir
+        </MudNavLink>
     </MudAppBar>
+
+    <!-- Drawer lateral -->
     <MudDrawer @bind-Open="_drawerOpen"
-               ClipMode="DrawerClipMode.Always"
-               Elevation="2">
+               Variant="DrawerVariant.Responsive"
+               Elevation="1"
+               Anchor="Anchor.Left"
+               Class="drawer-vita">
+        <MudDrawerHeader Class="px-4 py-3">
+            <MudImage Src="images/vita-logo.png" Alt="Vita Stays" Height="36" Class="mr-2" />
+            <MudText Typo="Typo.subtitle2" Class="text-drawer">Alojamiento de Cabañas</MudText>
+        </MudDrawerHeader>
+
         <NavMenu />
-    </MudDrawer>  
+    </MudDrawer>
+
     <MudMainContent>
-        <MudContainer MaxWidth="MaxWidth.Large" Style="margin-top: 3rem">
+        <MudContainer MaxWidth="MaxWidth.Large" Class="mt-10 px-4 pb-6">
             @Body
         </MudContainer>
     </MudMainContent>
+
 </MudLayout>
 
 @code {
-    bool _drawerOpen = false;
+    private bool _drawerOpen = true;
 
-    void DrawerToggle()
+    // Tema con tu paleta + tipografía
+    private MudTheme VitaTheme => new()
     {
-        _drawerOpen = !_drawerOpen;
-    }
+        PaletteLight = new PaletteLight
+        {
+            Primary = "#0056AC",      // (0,86,172)
+            Secondary = "#002851",    // (0,40,81)
+            Info = "#0056AC",
+            AppbarBackground = "#002851",
+            AppbarText = "#FFFFFF",
+            Background = "#FFFFFF",
+            DrawerBackground = "#002851",
+            DrawerText = "#FFFFFF",
+            TextPrimary = "#414141",  // (65,65,65)
+            TextSecondary = "#6E6E6E"
+        },
+        Typography = new Typography
+        {
+            Default = new DefaultTypography { FontFamily = new[] { "Century Gothic", "Segoe UI", "Inter", "sans-serif" } },
+            H6 = new H6Typography { FontFamily = new[] { "Century Gothic", "Segoe UI", "Inter", "sans-serif" }, FontWeight = "600" },
+            Body1 = new Body1Typography { FontFamily = new[] { "Century Gothic", "Segoe UI", "Inter", "sans-serif" } },
+            Button = new ButtonTypography { FontFamily = new[] { "Century Gothic", "Segoe UI", "Inter", "sans-serif" }, FontWeight = "600" }
+        }
+        
+    };
 }
