@@ -1,0 +1,112 @@
+﻿@page "/register"
+
+<MudContainer MaxWidth="MaxWidth.ExtraSmall" Class="mt-12">
+    <MudPaper Class="pa-6 rounded-lg" Elevation="20">
+
+        <!-- Título marca en azul oscuro (0,40,81) -->
+        <MudText Typo="Typo.h4" Class="text-center mb-1" Style="color:#002851">
+            Vita Stays
+        </MudText>
+
+        <MudText Typo="Typo.subtitle1" Class="text-center mb-6" Style="color:#414141">
+            Registro de Usuario
+        </MudText>
+
+        <!-- Campo Nombre -->
+        <MudTextField @bind-Value="user.Name" Label="Nombre"
+                      Variant="Variant.Outlined" FullWidth="true"
+                      Margin="Margin.Dense" Required="true"
+                      HelperText="Por favor, ingresa tu nombre." />
+
+        <!-- Campo Email -->
+        <MudTextField @bind-Value="user.Email" Label="Correo Electrónico"
+                      Variant="Variant.Outlined" FullWidth="true"
+                      Margin="Margin.Dense" InputType="InputType.Email"
+                      Required="true" Class="mt-4"
+                      HelperText="Por favor, ingresa un correo válido." />
+
+        <!-- Campo Contraseña con mostrar/ocultar -->
+        <MudTextField @bind-Value="user.Password" Label="Contraseña"
+                      Variant="Variant.Outlined" FullWidth="true"
+                      Margin="Margin.Dense" InputType="@PasswordInput"
+                      Required="true" Class="mt-4"
+                      HelperText="Por favor, ingresa una contraseña segura."
+                      Adornment="Adornment.End" AdornmentIcon="@PasswordInputIcon"
+                      OnAdornmentClick="ButtonTestclick" AdornmentAriaLabel="Show Password" />
+
+        <!-- Campo Teléfono -->
+        <MudTextField @bind-Value="user.PhoneNumber" Label="Teléfono"
+                      Variant="Variant.Outlined" FullWidth="true"
+                      Margin="Margin.Dense" Required="true"
+                      HelperText="Por favor, ingresa tu teléfono." />
+
+        <!-- Botón Registrar (azul oscuro, hover celeste) -->
+        <MudButton Class="mt-6 w-100 btn-vita"
+                   Variant="Variant.Filled"
+                   OnClick="HandleRegister">
+            Registrar
+        </MudButton>
+
+        <!-- Frase de abajo con color de marca -->
+        <MudText Class="text-center mt-4 form-note">
+            ¿Ya tienes cuenta?
+            <MudLink Href="/login" Class="link-vita"> Inicia sesión aquí</MudLink>
+        </MudText>
+    </MudPaper>
+</MudContainer>
+
+
+@code {
+    private CreateUserDto user = new CreateUserDto();
+
+    public string Password { get; set; } = string.Empty;
+    private bool isShow;
+    private InputType PasswordInput = InputType.Password;
+    private string PasswordInputIcon = Icons.Material.Filled.VisibilityOff;
+
+    [Inject] private ISnackbar Snackbar { get; set; } = null!;
+    [Inject] private HttpClient HttpClient { get; set; } = null!;
+    [Inject] private NavigationManager NavigationManager { get; set; } = null!;
+    [Inject] private IDialogService DialogService { get; set; } = null!;
+
+    protected override void OnInitialized()
+    {
+        Password = user.Password;
+    }
+
+    private void ButtonTestclick()
+    {
+        if (isShow)
+        {
+            isShow = false;
+            PasswordInputIcon = Icons.Material.Filled.VisibilityOff;
+            PasswordInput = InputType.Password;
+        }
+        else
+        {
+            isShow = true;
+            PasswordInputIcon = Icons.Material.Filled.Visibility;
+            PasswordInput = InputType.Text;
+        }
+    }
+
+    private async Task HandleRegister()
+    {
+        user.Role = Role.Employee;
+        var url = "api/auth/register";
+        var response = await HttpClient.PostAsJsonAsync(url, user);
+        if (response.IsSuccessStatusCode)
+        {
+            Snackbar.Add("Registro exitoso.", Severity.Success);
+            NavigationManager.NavigateTo("/login");
+        }
+        else if (response.StatusCode == System.Net.HttpStatusCode.Conflict)
+        {
+            Snackbar.Add("El correo electrónico ya está en uso.", Severity.Warning);
+        }
+        else
+        {
+            Snackbar.Add("Error al registrar el usuario.", Severity.Error);
+        }
+    }
+}

@@ -112,3 +112,110 @@ code {
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
     text-align: start;
 }
+
+/* ===== Vita Stays — Branding ===== */
+
+/* Fuente global */
+html, body, .mud-typography, .mud-button, .mud-input, .mud-table, .mud-appbar, .mud-nav-link {
+    font-family: "Century Gothic","Segoe UI","Inter",sans-serif !important;
+}
+
+/* AppBar: celeste */
+.appbar-vita {
+    background: #0072E3 !important; /* rgb(0,114,227) */
+}
+
+.text-appbar {
+    color: #fff !important;
+}
+
+/* Drawer lateral: mismo celeste + ancho mayor */
+.drawer-vita {
+    background-color: #0072E3 !important;
+}
+
+    .drawer-vita .text-drawer {
+        color: #fff;
+    }
+
+    .drawer-vita .mud-drawer-header .text-drawer {
+        color: #fff;
+    }
+
+/* Links del menú lateral en blanco */
+.navlink-vita {
+    color: #fff !important;
+}
+
+    .navlink-vita.mud-nav-link-active {
+        background-color: rgba(255,255,255,0.18);
+        border-radius: 8px;
+    }
+
+/* Botones del AppBar (perfil/salir/login/register) */
+.btn-appbar {
+    color: #fff !important;
+    border-color: rgba(255,255,255,0.7) !important;
+    background-color: rgba(255,255,255,0.12) !important;
+}
+
+/* Cards Login/Register */
+.login-paper {
+    border: 1px solid #e5e5e5;
+}
+
+/* Botones principales (Login/Register) — azul oscuro + hover celeste */
+.btn-vita {
+    background-color: #002851 !important; /* rgb(0,40,81) */
+    border-color: #002851 !important;
+    color: #fff !important;
+}
+
+    .btn-vita:hover {
+        background-color: #0072E3 !important; /* hover celeste */
+        border-color: #0072E3 !important;
+    }
+
+/* Links resaltados (recupérala aquí / inicia sesión) en azul oscuro */
+.link-vita {
+    color: #002851 !important;
+}
+
+/* Inputs: color de foco con celeste */
+.mud-input-root.mud-input-underline:after {
+    border-bottom-color: #0072E3 !important;
+}
+
+/* Frases y link debajo del formulario */
+.form-note {
+    color: #414141;
+}
+
+.link-vita {
+    color: #002851 !important;
+    text-decoration: underline;
+}
+
+    .link-vita:hover {
+        color: #0072E3 !important;
+    }
+
+    /* Link de marca: mismo color en todos los estados  */
+    .link-vita,
+    .link-vita:visited,
+    .link-vita:active,
+    .link-vita:focus {
+        color: #002851 !important; /* azul oscuro */
+        text-decoration: underline;
+    }
+
+        .link-vita:hover {
+            color: #0072E3 !important; /* celeste al hover */
+        }
+
+/* (opcional) si algún estilo de MudBlazor se interpone */
+.mud-typography .link-vita,
+.mud-typography .link-vita:visited {
+    color: #002851 !important;
+}
+

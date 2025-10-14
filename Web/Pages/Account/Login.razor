@@ -1,0 +1,91 @@
+﻿@page "/login"
+
+<MudContainer MaxWidth="MaxWidth.ExtraSmall" Class="mt-12">
+    <MudPaper Class="pa-6 rounded-lg login-paper" Elevation="12">
+        <MudText Typo="Typo.h4" Class="text-center mb-1" Style="color:#002851">Vita Stays</MudText>
+        <MudText Typo="Typo.subtitle1" Class="text-center mb-6" Style="color:#414141">Inicio de sesión</MudText>
+
+        <MudTextField @bind-Value="login.Email" Label="Usuario o Email" Variant="Variant.Outlined"
+                      FullWidth="true" Margin="Margin.Dense" Required="true" />
+
+        <MudTextField @bind-Value="login.Password" Label="Contraseña" Variant="Variant.Outlined"
+                      FullWidth="true" Margin="Margin.Dense" InputType="@PasswordInput"
+                      Required="true" Class="mt-3"
+                      Adornment="Adornment.End" AdornmentIcon="@PasswordInputIcon"
+                      OnAdornmentClick="ButtonTestclick" />
+
+        <!-- Botón azul oscuro, hover celeste -->
+        <MudButton Class="mt-5 w-100 btn-vita" OnClick="HandleLogin">Iniciar sesión</MudButton>
+
+        <MudText Class="text-center mt-4 form-note">
+            ¿Olvidaste tu contraseña?
+            <MudLink Href="/resetPassword" Class="link-vita"> Recupérala aquí</MudLink>
+        </MudText>
+    </MudPaper>
+</MudContainer>
+
+
+
+@code {
+    private readonly LoginRequestDto login = new();
+    public string Password { get; set; } = string.Empty;
+
+    [Inject] private HttpClient HttpClient { get; set; } = null!;
+    [Inject] private ISnackbar Snackbar { get; set; } = null!;
+    [Inject] private NavigationManager NavigationManager { get; set; } = null!;
+    [Inject] private AuthenticationStateProvider AuthenticationStateProvider { get; set; } = null!;
+    [Inject] private ILoginService LoginService { get; set; } = null!;
+
+    private bool isShow;
+    private InputType PasswordInput = InputType.Password;
+    private string PasswordInputIcon = Icons.Material.Filled.VisibilityOff;
+
+    protected override void OnInitialized()
+    {
+        Password = login.Password;
+    }
+
+    private void ButtonTestclick()
+    {
+        if (isShow)
+        {
+            isShow = false;
+            PasswordInputIcon = Icons.Material.Filled.VisibilityOff;
+            PasswordInput = InputType.Password;
+        }
+        else
+        {
+            isShow = true;
+            PasswordInputIcon = Icons.Material.Filled.Visibility;
+            PasswordInput = InputType.Text;
+        }
+    }
+
+    private async Task HandleLogin()
+    {
+        try
+        {
+            var url = "api/auth/login";
+            var response = await HttpClient.PostAsJsonAsync(url, login);
+            if (response.IsSuccessStatusCode)
+            {
+                var json = await response.Content.ReadAsStringAsync();
+                var loginResponse = JsonSerializer.Deserialize<LoginResponseDto>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+                if (loginResponse != null && loginResponse.IsAuthenticated)
+                {
+                    await ((AuthenticationProviderJWT)AuthenticationStateProvider).Login(loginResponse.Token);
+                    NavigationManager.NavigateTo("/");
+                }
+            }
+            else
+            {
+                Snackbar.Add("Credenciales inválidas. Inténtalo de nuevo.", Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error al iniciar sesión: {ex.Message}", Severity.Error);
+        }
+    }
+}
