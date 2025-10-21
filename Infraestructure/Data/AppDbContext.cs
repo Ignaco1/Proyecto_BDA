@@ -58,6 +58,22 @@ namespace Infraestructure.Data
                 entity.Property(e => e.Dni).IsRequired().HasMaxLength(11);
                 entity.Property(e => e.Telefono).IsRequired().HasMaxLength(15);
             });
+
+            modelBuilder.Entity<Objetivo>(e =>
+            {
+                e.Property(x => x.MetaOcupacion).HasColumnType("decimal(5,2)");
+                e.HasIndex(x => new { x.Año, x.Mes, x.IsActive });
+                e.HasIndex(x => new { x.Año, x.Mes }).IsUnique().HasFilter("[IsActive] = 1");
+            });
+
+            modelBuilder.Entity<Cancelacion>(e =>
+            {
+                e.HasIndex(x => new { x.ReservaId, x.Fecha });
+                e.HasOne(x => x.Reserva)
+                 .WithOne(r => r.Cancelacion)
+                 .HasForeignKey<Cancelacion>(x => x.ReservaId)
+                 .OnDelete(DeleteBehavior.Cascade);
+            });
         }
 
 

@@ -23,5 +23,7 @@ namespace Domain.Entities
         public EstadosReserva Estado { get; set; } = EstadosReserva.Pendiente;
 
         public MotivosCancelacion MotivosCancelacion { get; set; }
+
+        public Cancelacion? Cancelacion { get; set; }
     }
 }
