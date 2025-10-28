@@ -15,6 +15,8 @@ namespace Infraestructure.Data
         public DbSet<Cliente> Clientes { get; set; }
         public DbSet<User> Users { get; set; }
         public DbSet<Reserva> Reservas { get; set; }
+        public DbSet<Objetivo> Objetivos { get; set; }
+        public DbSet<Cancelacion> Cancelaciones { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

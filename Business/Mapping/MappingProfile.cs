@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Domain.DTOs.Requests;
 using Domain.DTOs.Responses;
 using Domain.Entities;
 using System;
@@ -14,6 +15,9 @@ namespace Business.Mapping
         public MappingProfile() 
         {
             CreateMap<User, UserResponseDto>();
+            CreateMap<Objetivo, ObjetivoResponseDto>();
+            CreateMap<AddObjetivoDto, Objetivo>();
+            CreateMap<UpdateObjetivoDto, Objetivo>();
         }
     }
 }

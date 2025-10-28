@@ -1,0 +1,150 @@
+﻿@page "/Objetivos"
+
+@inject IRequestService RequestService
+@inject ISnackbar Snackbar
+@inject NavigationManager NavigationManager
+@inject IDialogService DialogService
+
+<PageTitle>Objetivos</PageTitle>
+
+<!-- Botón agregar -->
+<MudStack Class="mb-3" Row="true" Justify="Justify.FlexStart">
+    <MudButton Class="btn-vita"
+               Variant="Variant.Filled"
+               StartIcon="@Icons.Material.Filled.Add"
+               OnClick="AddOpenDialog">
+        Nuevo Objetivo
+    </MudButton>
+</MudStack>
+
+@if (_objetivos == null)
+{
+    <div class="d-flex justify-center align-center" style="height: 60vh;">
+        <Loading />
+    </div>
+}
+else
+{
+    <MudTable Items="@_objetivosOrdenados" Hover="true" SortLabel="Ordenar por">
+        <HeaderContent>
+            <MudTh><MudTableSortLabel SortBy="new Func<ObjetivoResponseDto, object>(x => x.Id)">Id</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<ObjetivoResponseDto, object>(x => x.Año)">Año</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<ObjetivoResponseDto, object>(x => x.Mes)">Mes</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<ObjetivoResponseDto, object>(x => x.MetaOcupacion)">Meta Ocupación</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<ObjetivoResponseDto, object>(x => x.FechaCreacion)">Fecha Creación</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<ObjetivoResponseDto, object>(x => x.IsActive)">Estado</MudTableSortLabel></MudTh>
+            <MudTh></MudTh>
+        </HeaderContent>
+
+        <RowTemplate>
+            <MudTd DataLabel="Id">@context.Id</MudTd>
+            <MudTd DataLabel="Año">@context.Año</MudTd>
+            <MudTd DataLabel="Mes">@context.Mes</MudTd>
+            <MudTd DataLabel="Meta Ocupación">@($"{context.MetaOcupacion}%")</MudTd>
+            <MudTd DataLabel="Fecha Creación">@context.FechaCreacion.ToString("dd/MM/yyyy")</MudTd>
+
+            <MudTd DataLabel="Estado">
+                @if (context.IsActive)
+                {
+                    <MudChip T="string" Color="Color.Success" Variant="Variant.Filled" Label="true">Activo</MudChip>
+                }
+                else
+                {
+                    <MudChip T="string" Color="Color.Error" Variant="Variant.Outlined" Label="true">Inactivo</MudChip>
+                }
+            </MudTd>
+
+            <MudTd>
+                <MudIconButton Icon="@Icons.Material.Filled.Edit"
+                               Color="Color.Default"
+                               Style="color:#4a4a4a"
+                               OnClick="() => OpenEditObjetivo(context)"
+                               Size="Size.Small" />
+            </MudTd>
+        </RowTemplate>
+
+        <PagerContent>
+            <MudTablePager />
+        </PagerContent>
+    </MudTable>
+}
+
+@code {
+    private IEnumerable<ObjetivoResponseDto>? _objetivos;
+    private IEnumerable<ObjetivoResponseDto>? _objetivosOrdenados;
+
+    protected override async Task OnInitializedAsync() => await LoadObjetivos();
+
+    private async Task LoadObjetivos()
+    {
+        try
+        {
+            _objetivos = await RequestService.GetAsync<IEnumerable<ObjetivoResponseDto>>("api/objetivos");
+
+            _objetivosOrdenados = _objetivos?
+            .OrderByDescending(o => o.FechaCreacion)
+            .ThenByDescending(o => o.Año)
+            .ThenByDescending(o => o.Mes ?? 0)
+            .ToList();
+
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error al cargar los objetivos: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private async Task AddOpenDialog()
+    {
+        try
+        {
+            var options = new DialogOptions
+            {
+                CloseButton = true,
+                MaxWidth = MaxWidth.ExtraSmall,
+                FullWidth = true
+            };
+
+            var dialog = await DialogService.ShowAsync<AddObjetivo>("", options);
+            var result = await dialog.Result;
+
+            if (!result!.Canceled)
+            {
+                await LoadObjetivos();
+                Snackbar.Add("El nuevo objetivo se creó exitosamente.", Severity.Success);
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error al crear el objetivo: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private async Task OpenEditObjetivo(ObjetivoResponseDto objetivo)
+    {
+        try
+        {
+            var parameters = new DialogParameters { ["Objetivo"] = objetivo };
+
+            var options = new DialogOptions
+            {
+                CloseButton = true,
+                MaxWidth = MaxWidth.Small,
+                FullWidth = true
+            };
+
+            var dialog = await DialogService.ShowAsync<EditObjetivo>("", parameters, options);
+            var result = await dialog.Result;
+
+            if (!result!.Canceled)
+            {
+                await LoadObjetivos();
+                Snackbar.Add("Objetivo actualizado exitosamente.", Severity.Success);
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Ocurrió un error: {ex.Message}", Severity.Error);
+        }
+    }
+}

@@ -1,0 +1,126 @@
+﻿@inject IRequestService RequestService
+@inject ISnackbar Snackbar
+@inject NavigationManager NavigationManager
+
+<MudDialog MaxWidth="MaxWidth.Small" FullWidth="true">
+    <TitleContent>
+        <div style="display:flex;align-items:center;gap:12px;padding:4px 0;">
+            <MudIcon Icon="@Icons.Material.Filled.Add" Color="Color.Primary" Size="Size.Medium" />
+            <MudText Typo="Typo.h5" Style="margin:0;font-weight:500;">
+                Crear Objetivo
+            </MudText>
+        </div>
+    </TitleContent>
+
+    <DialogContent>
+        <MudContainer Style="padding:0;">
+            <MudGrid Spacing="3">
+
+                <!-- Año -->
+                <MudItem xs="12" md="6">
+                    <MudTextField @bind-Value="_objetivoDto.Año"
+                                  Label="Año"
+                                  Variant="Variant.Outlined"
+                                  Type="number"
+                                  Required="true"
+                                  RequiredError="El año es requerido"
+                                  HelperText="Ejemplo: 2025"
+                                  Adornment="Adornment.Start"
+                                  AdornmentIcon="@Icons.Material.Filled.CalendarMonth"
+                                  AdornmentColor="Color.Primary" />
+                </MudItem>
+
+                <!-- Mes -->
+                <MudItem xs="12" md="6">
+                    <MudTextField @bind-Value="_objetivoDto.Mes"
+                                  Label="Mes"
+                                  Variant="Variant.Outlined"
+                                  Type="number"
+                                  HelperText="Ingrese el número de mes (1-12)"
+                                  Adornment="Adornment.Start"
+                                  AdornmentIcon="@Icons.Material.Filled.DateRange"
+                                  AdornmentColor="Color.Primary" />
+                </MudItem>
+
+                <!-- Meta de Ocupación -->
+                <MudItem xs="12">
+                    <MudTextField @bind-Value="_objetivoDto.MetaOcupacion"
+                                  Label="Meta de Ocupación (%)"
+                                  Variant="Variant.Outlined"
+                                  Type="number"
+                                  Min="0"
+                                  Max="100"
+                                  Step="0.5"
+                                  Required="true"
+                                  RequiredError="La meta de ocupación es requerida"
+                                  HelperText="Ingrese un valor entre 0 y 100"
+                                  Adornment="Adornment.Start"
+                                  AdornmentIcon="@Icons.Material.Filled.BarChart"
+                                  AdornmentColor="Color.Primary" />
+                </MudItem>
+
+                <!-- Separador visual -->
+                <MudItem xs="12">
+                    <MudDivider Style="margin:8px 0;" />
+                </MudItem>
+
+            </MudGrid>
+        </MudContainer>
+    </DialogContent>
+
+    <DialogActions>
+        <MudButton OnClick="Cancel"
+                   Variant="Variant.Text"
+                   StartIcon="@Icons.Material.Filled.Cancel"
+                   Color="Color.Default"
+                   Style="padding:16px 24px"
+                   Size="Size.Medium">
+            Cancelar
+        </MudButton>
+
+        <MudButton OnClick="SaveChanges"
+                   Variant="Variant.Filled"
+                   StartIcon="@Icons.Material.Filled.Save"
+                   Color="Color.Primary"
+                   Size="Size.Medium"
+                   Style="margin-left:8px;">
+            Guardar
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    private IMudDialogInstance MudDialog { get; set; } = null!;
+
+    private AddObjetivoDto _objetivoDto = new();
+
+    private async Task SaveChanges()
+    {
+        try
+        {
+            _objetivoDto.FechaCreacion = default;
+
+            var response = await RequestService.PostAsync("api/objetivos", _objetivoDto);
+
+            if (response.IsSuccessStatusCode)
+            {
+                MudDialog.Close(DialogResult.Ok(true));
+                Snackbar.Add("El objetivo fue creado correctamente.", Severity.Success);
+            }
+            else
+            {
+                Snackbar.Add($"Error creando el objetivo: {response.ReasonPhrase}", Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error creando el objetivo: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private void Cancel()
+    {
+        MudDialog.Cancel();
+    }
+}

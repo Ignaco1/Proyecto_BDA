@@ -4,6 +4,7 @@ using Infraestructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infraestructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251022005227_prime")]
+    partial class prime
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -80,7 +83,7 @@ namespace Infraestructure.Migrations
 
                     b.HasIndex("ReservaId", "Fecha");
 
-                    b.ToTable("Cancelaciones");
+                    b.ToTable("Cancelacion");
                 });
 
             modelBuilder.Entity("Domain.Entities.Cliente", b =>
@@ -150,7 +153,7 @@ namespace Infraestructure.Migrations
 
                     b.HasIndex("Año", "Mes", "IsActive");
 
-                    b.ToTable("Objetivos");
+                    b.ToTable("Objetivo");
                 });
 
             modelBuilder.Entity("Domain.Entities.Reserva", b =>

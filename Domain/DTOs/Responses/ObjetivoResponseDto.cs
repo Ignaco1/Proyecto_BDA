@@ -6,9 +6,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Domain.Entities
+namespace Domain.DTOs.Responses
 {
-    public class Objetivo
+    public class ObjetivoResponseDto
     {
         public int Id { get; set; }
         public int Año { get; set; }
