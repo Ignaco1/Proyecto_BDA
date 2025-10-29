@@ -1,4 +1,4 @@
-﻿﻿<AuthorizeView>
+﻿<AuthorizeView>
     <Authorized>
         <MudStack Row="true" Spacing="2" Justify="Justify.Center" AlignItems="AlignItems.Center">
             <MudText Typo="Typo.subtitle2" Class="d-inline-flex text-appbar">Hola, @username</MudText>
@@ -32,6 +32,7 @@
     [Inject] private AuthenticationStateProvider AuthenticationStateProvider { get; set; } = null!;
     [Inject] private AuthService AuthService { get; set; } = null!;
     [Inject] private NavigationManager NavigationManager { get; set; } = null!;
+    [Inject] private ISnackbar Snackbar { get; set; } = null!;﻿
 
     protected override async Task OnParametersSetAsync()
     {
@@ -46,11 +47,14 @@
             await customProvider.Logout();
         }
 
-        NavigationManager.NavigateTo("/login");
+        Snackbar.Add("Cerraste sesión.", Severity.Warning);
+        await Task.Delay(600);
+        
+        NavigationManager.NavigateTo("/");
     }
 
     private void EditUser()
     {
-        NavigationManager.NavigateTo("/profile");
+        NavigationManager.NavigateTo("/perfil");
     }
 }

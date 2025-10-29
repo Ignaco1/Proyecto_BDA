@@ -12,39 +12,64 @@
             Registro de Usuario
         </MudText>
 
-        <!-- Campo Nombre -->
-        <MudTextField @bind-Value="user.Name" Label="Nombre"
-                      Variant="Variant.Outlined" FullWidth="true"
-                      Margin="Margin.Dense" Required="true"
+        <!-- Nombre -->
+        <MudTextField @bind-Value="user.Name"
+                      Label="Nombre"
+                      Variant="Variant.Outlined"
+                      FullWidth="true"
+                      Margin="Margin.Dense"
+                      Required="true"
+                      RequiredError="El nombre es obligatorio."
+                      Immediate="true"
                       HelperText="Por favor, ingresa tu nombre." />
 
-        <!-- Campo Email -->
-        <MudTextField @bind-Value="user.Email" Label="Correo Electrónico"
-                      Variant="Variant.Outlined" FullWidth="true"
-                      Margin="Margin.Dense" InputType="InputType.Email"
-                      Required="true" Class="mt-4"
-                      HelperText="Por favor, ingresa un correo válido." />
+        <!-- Email -->
+        <MudTextField @bind-Value="user.Email"
+                      Label="Correo Electrónico"
+                      Variant="Variant.Outlined"
+                      FullWidth="true"
+                      Margin="Margin.Dense"
+                      Required="true"
+                      RequiredError="El correo es obligatorio."
+                      Immediate="true"
+                      HelperText="Debe tener al menos un arroba y un dominio."
+                      Class="mt-4"
+                      InputType="InputType.Email" />
 
-        <!-- Campo Contraseña con mostrar/ocultar -->
-        <MudTextField @bind-Value="user.Password" Label="Contraseña"
-                      Variant="Variant.Outlined" FullWidth="true"
-                      Margin="Margin.Dense" InputType="@PasswordInput"
-                      Required="true" Class="mt-4"
-                      HelperText="Por favor, ingresa una contraseña segura."
-                      Adornment="Adornment.End" AdornmentIcon="@PasswordInputIcon"
-                      OnAdornmentClick="ButtonTestclick" AdornmentAriaLabel="Show Password" />
+        <!-- Contraseña -->
+        <MudTextField @bind-Value="user.Password"
+                      Label="Contraseña"
+                      Variant="Variant.Outlined"
+                      FullWidth="true"
+                      Margin="Margin.Dense"
+                      Required="true"
+                      RequiredError="La contraseña es obligatoria."
+                      Immediate="true"
+                      HelperText="La contraseña es obligatoria."
+                      Class="mt-4"
+                      InputType="@PasswordInput"
+                      Adornment="Adornment.End"
+                      AdornmentIcon="@PasswordInputIcon"
+                      OnAdornmentClick="ButtonTestclick"
+                      AdornmentAriaLabel="Mostrar/Ocultar" />
 
-        <!-- Campo Teléfono -->
-        <MudTextField @bind-Value="user.PhoneNumber" Label="Teléfono"
-                      Variant="Variant.Outlined" FullWidth="true"
-                      Margin="Margin.Dense" Required="true"
-                      HelperText="Por favor, ingresa tu teléfono." />
+        <!-- Teléfono -->
+        <MudTextField @bind-Value="user.PhoneNumber"
+                      Label="Teléfono"
+                      Variant="Variant.Outlined"
+                      FullWidth="true"
+                      Margin="Margin.Dense"
+                      Required="true"
+                      RequiredError="El teléfono es obligatorio."
+                      Immediate="true"
+                      HelperText="Incluye el código de área." />
 
         <!-- Botón Registrar (azul oscuro, hover celeste) -->
         <MudButton Class="mt-6 w-100 btn-vita"
                    Variant="Variant.Filled"
+                   Disabled="@isSubmitting"
                    OnClick="HandleRegister">
-            Registrar
+            @(isSubmitting ? "Registrando..." : "Registrar")
         </MudButton>
 
         <!-- Frase de abajo con color de marca -->
@@ -58,6 +83,7 @@
 
 @code {
     private CreateUserDto user = new CreateUserDto();
+    private bool isSubmitting;
 
     public string Password { get; set; } = string.Empty;
     private bool isShow;
@@ -90,23 +116,95 @@
         }
     }
 
-    private async Task HandleRegister()
+    private bool ValidateInputs()
     {
-        user.Role = Role.Employee;
-        var url = "api/auth/register";
-        var response = await HttpClient.PostAsJsonAsync(url, user);
-        if (response.IsSuccessStatusCode)
+        var ok = true;
+
+        user.Name = user.Name?.Trim();
+        user.Email = user.Email?.Trim();
+        user.Password = user.Password?.Trim();
+        user.PhoneNumber = user.PhoneNumber?.Trim();
+
+        if (string.IsNullOrWhiteSpace(user.Name))
         {
-            Snackbar.Add("Registro exitoso.", Severity.Success);
-            NavigationManager.NavigateTo("/login");
+            Snackbar.Add("El nombre es obligatorio.", Severity.Error);
+            ok = false;
         }
-        else if (response.StatusCode == System.Net.HttpStatusCode.Conflict)
+
+        if (string.IsNullOrWhiteSpace(user.Email))
         {
-            Snackbar.Add("El correo electrónico ya está en uso.", Severity.Warning);
+            Snackbar.Add("El correo es obligatorio.", Severity.Error);
+            ok = false;
         }
         else
         {
-            Snackbar.Add("Error al registrar el usuario.", Severity.Error);
+            if (!user.Email.Contains('@') || user.Email.StartsWith("@") || user.Email.EndsWith("@") || !user.Email.Contains("."))
+            {
+                Snackbar.Add("El correo debe contener un '@' válido y debe llevar un formato como este: nacho@gmail.com.", Severity.Error);
+                ok = false;
+            }
+        }
+
+        if (string.IsNullOrWhiteSpace(user.Password))
+        {
+            Snackbar.Add("La contraseña es obligatoria.", Severity.Error);
+            ok = false;
+        }
+
+        if (string.IsNullOrWhiteSpace(user.PhoneNumber))
+        {
+            Snackbar.Add("El teléfono es obligatorio.", Severity.Error);
+            ok = false;
+        }
+
+        return ok;
+    }
+
+    private async Task HandleRegister()
+    {
+        if (isSubmitting) return;
+
+        if (!ValidateInputs())
+            return;
+
+        try
+        {
+            isSubmitting = true;
+
+            user.Email = user.Email!.ToLowerInvariant();
+
+            var url = "api/auth/register";
+            var response = await HttpClient.PostAsJsonAsync(url, user);
+
+            if (response.IsSuccessStatusCode)
+            {
+                Snackbar.Add("Registro exitoso.", Severity.Success);
+                await Task.Delay(800);
+                NavigationManager.NavigateTo("/login");
+                return;
+            }
+
+            if (response.StatusCode == System.Net.HttpStatusCode.Conflict)
+            {
+                Snackbar.Add("El correo electrónico ya está en uso.", Severity.Warning);
+            }
+            else if (response.StatusCode == System.Net.HttpStatusCode.BadRequest)
+            {
+                var details = await response.Content.ReadAsStringAsync();
+                Snackbar.Add($"Datos inválidos. {details}", Severity.Error);
+            }
+            else
+            {
+                Snackbar.Add("Error al registrar el usuario.", Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error al registrar: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            isSubmitting = false;
         }
     }
 }

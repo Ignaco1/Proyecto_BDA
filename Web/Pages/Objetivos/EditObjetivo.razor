@@ -4,7 +4,8 @@
 <MudDialog MaxWidth="MaxWidth.Small" FullWidth="true">
     <TitleContent>
         <div style="display:flex;align-items:center;gap:12px;padding:4px 0;">
-            <MudIcon Icon="@Icons.Material.Filled.Edit" Color="Color.Warning" Size="Size.Medium" />
+            <!-- Ícono del título en azul Vita -->
+            <MudIcon Icon="@Icons.Material.Filled.Edit" Class="icon-vita" Size="Size.Medium" />
             <MudText Typo="Typo.h5" Style="margin:0;font-weight:500;">
                 Editar Objetivo
             </MudText>
@@ -18,6 +19,7 @@
                 <!-- Año -->
                 <MudItem xs="12" md="6">
                     <MudTextField @bind-Value="_updateObjetivoDto.Año"
+                                  Class="vita-adorn"
                                   Label="Año"
                                   Variant="Variant.Outlined"
                                   Type="number"
@@ -26,24 +28,26 @@
                                   HelperText="Ejemplo: 2025"
                                   Adornment="Adornment.Start"
                                   AdornmentIcon="@Icons.Material.Filled.CalendarMonth"
-                                  AdornmentColor="Color.Primary" />
+                                  AdornmentColor="Color.Default" />
                 </MudItem>
 
                 <!-- Mes -->
                 <MudItem xs="12" md="6">
                     <MudTextField @bind-Value="_updateObjetivoDto.Mes"
+                                  Class="vita-adorn"
                                   Label="Mes"
                                   Variant="Variant.Outlined"
                                   Type="number"
                                   HelperText="Ingrese el número de mes (1-12)"
                                   Adornment="Adornment.Start"
                                   AdornmentIcon="@Icons.Material.Filled.DateRange"
-                                  AdornmentColor="Color.Primary" />
+                                  AdornmentColor="Color.Default" />
                 </MudItem>
 
                 <!-- Meta de Ocupación -->
                 <MudItem xs="12">
                     <MudTextField @bind-Value="_updateObjetivoDto.MetaOcupacion"
+                                  Class="vita-adorn"
                                   Label="Meta de Ocupación (%)"
                                   Variant="Variant.Outlined"
                                   Type="number"
@@ -55,7 +59,7 @@
                                   HelperText="Ingrese un valor entre 0 y 100"
                                   Adornment="Adornment.Start"
                                   AdornmentIcon="@Icons.Material.Filled.BarChart"
-                                  AdornmentColor="Color.Primary" />
+                                  AdornmentColor="Color.Default" />
                 </MudItem>
 
                 <!-- Separador visual -->
@@ -68,6 +72,7 @@
     </DialogContent>
 
     <DialogActions>
+        <!-- Botón Cancelar (gris neutro) -->
         <MudButton OnClick="Cancel"
                    Variant="Variant.Text"
                    StartIcon="@Icons.Material.Filled.Cancel"
@@ -77,10 +82,11 @@
             Cancelar
         </MudButton>
 
+        <!-- Botón Guardar (azul oscuro Vita) -->
         <MudButton OnClick="SaveChanges"
                    Variant="Variant.Filled"
                    StartIcon="@Icons.Material.Filled.Save"
-                   Color="Color.Primary"
+                   Class="btn-vita"
                    Size="Size.Medium"
                    Style="margin-left:8px;">
             Guardar
@@ -126,12 +132,13 @@
             }
             else
             {
-                Snackbar.Add($"Error modificando el objetivo: {response.ReasonPhrase}", Severity.Error);
+                var mensaje = await response.Content.ReadAsStringAsync();
+                Snackbar.Add(mensaje, Severity.Error);
             }
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"Error modificando el objetivo: {ex.Message}", Severity.Error);
+            Snackbar.Add($"Error al modificar el objetivo: {ex.Message}", Severity.Error);
         }
     }
 }

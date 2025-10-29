@@ -9,6 +9,7 @@ namespace Api.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]
+    [ApiExplorerSettings(IgnoreApi = false)]
     public class ObjetivosController(IObjetivoService IObjetivoService) : ControllerBase
     {
         private readonly IObjetivoService _IObjetivoService = IObjetivoService;
@@ -34,32 +35,61 @@ namespace Api.Controllers
         }
 
         [HttpPost]
+        [Consumes("application/json")]
+        [AllowAnonymous]
         public async Task<IActionResult> Create([FromBody] AddObjetivoDto objetivoDto)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
+            ModelState.ClearValidationState(nameof(AddObjetivoDto));
 
-            var createdObjetivo = await _IObjetivoService.CreateObjetivoAsync(objetivoDto);
-            return CreatedAtAction(nameof(GetById), new { id = createdObjetivo.Id }, createdObjetivo);
+            try
+            {
+                var created = await _IObjetivoService.CreateObjetivoAsync(objetivoDto);
+                return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
+            }
+            catch (ArgumentException ex)
+            {
+                return new ContentResult
+                {
+                    StatusCode = 400,
+                    Content = ex.Message,
+                    ContentType = "text/plain"
+                };
+            }
+            catch (InvalidOperationException ex)
+            {
+                return new ContentResult
+                {
+                    StatusCode = 409,
+                    Content = ex.Message,
+                    ContentType = "text/plain"
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ContentResult
+                {
+                    StatusCode = 500,
+                    Content = "Error interno: " + ex.Message,
+                    ContentType = "text/plain"
+                };
+            }
         }
 
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, [FromBody] UpdateObjetivoDto objetivoDto)
         {
             if (id != objetivoDto.Id)
-            {
-                return BadRequest();
-            }
+                return BadRequest("El ID no coincide con el objetivo." );
 
-            if (!ModelState.IsValid)
+            try
             {
-                return BadRequest(ModelState);
+                await _IObjetivoService.UpdateObjetivoAsync(objetivoDto);
+                return Ok("Objetivo actualizado correctamente." );
             }
-
-            await _IObjetivoService.UpdateObjetivoAsync(objetivoDto);
-            return NoContent();
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message );
+            }
         }
 
     }

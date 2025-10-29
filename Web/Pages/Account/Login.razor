@@ -16,7 +16,12 @@
                       OnAdornmentClick="ButtonTestclick" />
 
         <!-- Botón azul oscuro, hover celeste -->
-        <MudButton Class="mt-5 w-100 btn-vita" OnClick="HandleLogin">Iniciar sesión</MudButton>
+        <MudButton Class="mt-4 w-100 btn-vita"
+                   Variant="Variant.Filled"
+                   Disabled="@isLoading"
+                   OnClick="HandleLogin">
+            @(isLoading ? "Iniciando sesión..." : "Iniciar sesión")
+        </MudButton>
 
         <MudText Class="text-center mt-4 form-note">
             ¿Olvidaste tu contraseña?
@@ -28,6 +33,8 @@
 
 
 @code {
+    private bool isLoading;
+    
     private readonly LoginRequestDto login = new();
     public string Password { get; set; } = string.Empty;
 
@@ -64,6 +71,10 @@
 
     private async Task HandleLogin()
     {
+        if (isLoading) return;
+
+        isLoading = true;
+        
         try
         {
             var url = "api/auth/login";
@@ -76,6 +87,8 @@
                 if (loginResponse != null && loginResponse.IsAuthenticated)
                 {
                     await ((AuthenticationProviderJWT)AuthenticationStateProvider).Login(loginResponse.Token);
+                    Snackbar.Add("¡Sesión iniciada correctamente!", Severity.Success);
+                    await Task.Delay(900);
                     NavigationManager.NavigateTo("/");
                 }
             }
@@ -87,6 +100,10 @@
         catch (Exception ex)
         {
             Snackbar.Add($"Error al iniciar sesión: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            isLoading = false;
         }
     }
 }

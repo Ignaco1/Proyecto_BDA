@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
+using MudBlazor;
 using MudBlazor.Services;
 using Web.Auth;
 using Web.Services;
@@ -18,7 +19,18 @@ namespace Web
 
             builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(url) });
             builder.Services.AddAuthorizationCore();
-            builder.Services.AddMudServices();
+            builder.Services.AddMudServices(config =>
+            {
+                var s = config.SnackbarConfiguration;
+                s.PositionClass = Defaults.Classes.Position.TopRight;
+                s.PreventDuplicates = true;
+                s.NewestOnTop = true;
+                s.ShowCloseIcon = true;
+                s.VisibleStateDuration = 2500;   
+                s.HideTransitionDuration = 200;  
+                s.ShowTransitionDuration = 200;  
+                s.SnackbarVariant = Variant.Filled;
+            });
             builder.Services.AddScoped<AuthenticationProviderJWT>();
             builder.Services.AddScoped<AuthService>();
             builder.Services.AddScoped<AuthenticationStateProvider, AuthenticationProviderJWT>(x => x.GetRequiredService<AuthenticationProviderJWT>());

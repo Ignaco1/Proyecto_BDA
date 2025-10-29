@@ -170,4 +170,25 @@ code {
         color: #ffffff !important;
     }
 
+/* ===== Colores corporativos Vita ===== */
+:root {
+    --vita-dark-blue: #002851;
+    --vita-light-blue: #0072E3;
+}
+
+/* Iconos sueltos (títulos del diálogo, etc.) */
+.icon-vita {
+    color: var(--vita-dark-blue) !important;
+}
+
+    .icon-vita:hover {
+        color: var(--vita-light-blue) !important;
+    }
+
+/* Forzar color del ícono de Adornment (los íconos dentro de los inputs) */
+.vita-adorn .mud-input-adornment .mud-icon {
+    color: var(--vita-dark-blue) !important;
+}
+
+
 
