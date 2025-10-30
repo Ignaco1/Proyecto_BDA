@@ -5,6 +5,7 @@ using Business.Interfaces;
 using Domain.DTOs.Requests;
 using Domain.DTOs.Responses;
 using Domain.Entities;
+using Domain.Enums;
 using Domain.Intefaces;
 using System;
 using System.Collections.Generic;
@@ -19,42 +20,54 @@ namespace Business.Services
         private readonly IObjetivoRepository _objetivoRepository = objetivoRepository;
         private readonly IMapper _mapper = mapper;
 
-        public async Task<ObjetivoResponseDto> CreateObjetivoAsync(AddObjetivoDto objetivoDto)
+        public async Task<ObjetivoResponseDto> CreateObjetivoAsync(AddObjetivoDto dto)
         {
-            if (objetivoDto == null)
-                throw new ArgumentException("El objetivo no puede ser nulo.");
+            if (dto == null) throw new ArgumentException("El objetivo no puede ser nulo.");
 
-            if (objetivoDto.Año <= 0)
-                throw new ArgumentException("El campo 'Año' es obligatorio y debe ser mayor que cero.");
-            if (objetivoDto.Año > DateTime.Now.Year)
-                throw new ArgumentException("El año no puede ser mayor al actual.");
-
-            if (!objetivoDto.Mes.HasValue)
-                throw new ArgumentException("El campo 'Mes' es obligatorio.");
-            if (objetivoDto.Mes < 1 || objetivoDto.Mes > 12)
-                throw new ArgumentException("El campo 'Mes' debe estar entre 1 y 12.");
-
-            if (objetivoDto.MetaOcupacion <= 0)
-                throw new ArgumentException("La 'Meta de Ocupación' debe ser mayor que cero.");
-            if (objetivoDto.MetaOcupacion > 100)
-                throw new ArgumentException("La 'Meta de Ocupación' no puede superar el 100%.");
-
+            if (dto.Año <= 0) throw new ArgumentException("El campo 'Año' debe ser mayor que cero.");
+            if (dto.Año > DateTime.Now.Year) throw new ArgumentException("El año no puede ser mayor al actual.");
+            if (dto.MetaOcupacion <= 0) throw new ArgumentException("La 'Meta de Ocupación' debe ser mayor que cero.");
+            if (dto.MetaOcupacion > 100) throw new ArgumentException("La 'Meta de Ocupación' no puede superar el 100%.");
 
             var existentes = await _objetivoRepository.GetAllAsync();
-            if (existentes.Any(x => x.Año == objetivoDto.Año && x.Mes == objetivoDto.Mes))
-                throw new InvalidOperationException($"Ya existe un objetivo para {objetivoDto.Mes}/{objetivoDto.Año}.");
 
-            foreach (var obj in existentes.Where(x => x.IsActive))
+            switch (dto.Tipo)
             {
-                obj.IsActive = false;
-                await _objetivoRepository.UpdateAsync(obj);
+                case TipoObjetivo.General:
+                    dto.Mes = null;
+                    dto.IdCabaña = null;
+
+                    if (existentes.Any(x => x.Tipo == TipoObjetivo.General && x.Año == dto.Año))
+                        throw new InvalidOperationException($"Ya existe un objetivo general para el año {dto.Año}.");
+
+                    foreach (var obj in existentes.Where(x => x.Tipo == TipoObjetivo.General && x.IsActive))
+                    {
+                        obj.IsActive = false;
+                        await _objetivoRepository.UpdateAsync(obj);
+                    }
+                    break;
+
+                case TipoObjetivo.Anual:
+                    if (dto.IdCabaña is null) throw new ArgumentException("Debe seleccionar una cabaña.");
+                    dto.Mes = null;
+                    if (existentes.Any(x => x.Tipo == TipoObjetivo.Anual && x.Año == dto.Año && x.IdCabaña == dto.IdCabaña))
+                        throw new InvalidOperationException($"Ya existe un objetivo anual para la cabaña {dto.IdCabaña} en {dto.Año}.");
+                    break;
+
+                case TipoObjetivo.Mensual:
+                    if (dto.IdCabaña is null) throw new ArgumentException("Debe seleccionar una cabaña.");
+                    if (!dto.Mes.HasValue || dto.Mes < 1 || dto.Mes > 12)
+                        throw new ArgumentException("El campo 'Mes' debe estar entre 1 y 12.");
+                    if (existentes.Any(x => x.Tipo == TipoObjetivo.Mensual && x.Año == dto.Año && x.Mes == dto.Mes && x.IdCabaña == dto.IdCabaña))
+                        throw new InvalidOperationException($"Ya existe un objetivo mensual para la cabaña {dto.IdCabaña} en {dto.Mes}/{dto.Año}.");
+                    break;
             }
 
-            var nuevoObjetivo = _mapper.Map<Objetivo>(objetivoDto);
-            nuevoObjetivo.FechaCreacion = DateTime.Now;
-            nuevoObjetivo.IsActive = true;
+            var nuevo = _mapper.Map<Objetivo>(dto);
+            nuevo.FechaCreacion = DateTime.Now;
+            nuevo.IsActive = true;
 
-            var creado = await _objetivoRepository.AddAsync(nuevoObjetivo);
+            var creado = await _objetivoRepository.AddAsync(nuevo);
             return _mapper.Map<ObjetivoResponseDto>(creado);
         }
 
@@ -71,44 +84,51 @@ namespace Business.Services
             return _mapper.Map<ObjetivoResponseDto>(objetivo);
         }
 
-        public async Task UpdateObjetivoAsync(UpdateObjetivoDto ObjetivoDto)
+        public async Task UpdateObjetivoAsync(UpdateObjetivoDto dto)
         {
-            var existing = await _objetivoRepository.GetByIdAsync(ObjetivoDto.Id);
-            
-            if (existing == null)
-                throw new Exception("El objetivo no existe.");
+            var existing = await _objetivoRepository.GetByIdAsync(dto.Id);
+            if (existing == null) throw new Exception("El objetivo no existe.");
 
 
-            if (ObjetivoDto.Año <= 0)
-                throw new ArgumentException("El campo 'Año' es obligatorio y debe ser mayor que cero.");
-            if (ObjetivoDto.Año > DateTime.Now.Year)
-                throw new ArgumentException("El año no puede ser mayor al actual.");
+            if (dto.Año <= 0) throw new ArgumentException("El campo 'Año' debe ser mayor que cero.");
+            if (dto.Año > DateTime.Now.Year) throw new ArgumentException("El año no puede ser mayor al actual.");
+            if (dto.MetaOcupacion <= 0) throw new ArgumentException("La 'Meta de Ocupación' debe ser mayor que cero.");
+            if (dto.MetaOcupacion > 100) throw new ArgumentException("La 'Meta de Ocupación' no puede superar el 100%.");
 
-            if (!ObjetivoDto.Mes.HasValue)
-                throw new ArgumentException("El campo 'Mes' es obligatorio.");
-            if (ObjetivoDto.Mes < 1 || ObjetivoDto.Mes > 12)
-                throw new ArgumentException("El campo 'Mes' debe estar entre 1 y 12.");
+            var todos = await _objetivoRepository.GetAllAsync();
 
-            if (ObjetivoDto.MetaOcupacion <= 0)
-                throw new ArgumentException("La 'Meta de Ocupación' debe ser mayor que cero.");
-            if (ObjetivoDto.MetaOcupacion > 100)
-                throw new ArgumentException("La 'Meta de Ocupación' no puede superar el 100%.");
+            switch (existing.Tipo)
+            {
+                case TipoObjetivo.General:
+                    dto.Mes = null;
+                    dto.IdCabaña = null;
+                    if (todos.Any(o => o.Id != dto.Id && o.Tipo == TipoObjetivo.General && o.Año == dto.Año))
+                        throw new Exception($"Ya existe un objetivo general para el año {dto.Año}.");
+                    break;
 
+                case TipoObjetivo.Anual:
+                    if (dto.IdCabaña is null) throw new ArgumentException("Debe seleccionar una cabaña.");
+                    dto.Mes = null;
+                    if (todos.Any(o => o.Id != dto.Id && o.Tipo == TipoObjetivo.Anual && o.Año == dto.Año && o.IdCabaña == dto.IdCabaña))
+                        throw new Exception($"Ya existe un objetivo anual para esa cabaña en {dto.Año}.");
+                    break;
 
-            var allObjetivos = await _objetivoRepository.GetAllAsync();
-            var duplicado = allObjetivos.Any(o =>
-                o.Id != ObjetivoDto.Id &&               
-                o.Año == ObjetivoDto.Año &&
-                o.Mes == ObjetivoDto.Mes);
+                case TipoObjetivo.Mensual:
+                    if (dto.IdCabaña is null) throw new ArgumentException("Debe seleccionar una cabaña.");
+                    if (!dto.Mes.HasValue || dto.Mes < 1 || dto.Mes > 12)
+                        throw new ArgumentException("El campo 'Mes' debe estar entre 1 y 12.");
+                    if (todos.Any(o => o.Id != dto.Id && o.Tipo == TipoObjetivo.Mensual && o.Año == dto.Año && o.Mes == dto.Mes && o.IdCabaña == dto.IdCabaña))
+                        throw new Exception($"Ya existe un objetivo mensual para esa cabaña en {dto.Mes}/{dto.Año}.");
+                    break;
+            }
 
-            if (duplicado)
-                throw new Exception($"Ya existe un objetivo para {ObjetivoDto.Mes}/{ObjetivoDto.Año}.");
-
-            existing.Año = ObjetivoDto.Año;
-            existing.Mes = ObjetivoDto.Mes;
-            existing.MetaOcupacion = ObjetivoDto.MetaOcupacion;
+            existing.Año = dto.Año;
+            existing.Mes = dto.Mes;
+            existing.MetaOcupacion = dto.MetaOcupacion;
+            existing.IdCabaña = dto.IdCabaña;
 
             await _objetivoRepository.UpdateAsync(existing);
         }
+
     }
 }

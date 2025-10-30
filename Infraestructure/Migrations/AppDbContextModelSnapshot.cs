@@ -133,6 +133,9 @@ namespace Infraestructure.Migrations
                     b.Property<DateTime>("FechaCreacion")
                         .HasColumnType("datetime2");
 
+                    b.Property<int?>("IdCabaña")
+                        .HasColumnType("int");
+
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
@@ -142,7 +145,12 @@ namespace Infraestructure.Migrations
                     b.Property<decimal>("MetaOcupacion")
                         .HasColumnType("decimal(5,2)");
 
+                    b.Property<int>("Tipo")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("IdCabaña");
 
                     b.HasIndex("Año", "Mes")
                         .IsUnique()
@@ -239,6 +247,15 @@ namespace Infraestructure.Migrations
                         .IsRequired();
 
                     b.Navigation("Reserva");
+                });
+
+            modelBuilder.Entity("Domain.Entities.Objetivo", b =>
+                {
+                    b.HasOne("Domain.Entities.Cabaña", "Cabaña")
+                        .WithMany()
+                        .HasForeignKey("IdCabaña");
+
+                    b.Navigation("Cabaña");
                 });
 
             modelBuilder.Entity("Domain.Entities.Reserva", b =>

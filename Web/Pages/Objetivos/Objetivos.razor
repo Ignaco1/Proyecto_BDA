@@ -1,0 +1,55 @@
+﻿@page "/objetivos"
+@using MudBlazor
+@inject NavigationManager Navigation
+
+<PageTitle>Objetivos</PageTitle>
+
+<MudPaper Class="pa-6" Elevation="4" Style="max-width:800px; margin:auto; text-align:center; border-radius:20px;">
+    <h2 class="mb-6" style="color:#002851;">Gestión de Objetivos</h2>
+
+    <MudText Typo="Typo.subtitle1" Class="mb-6">
+        Selecciona el tipo de objetivo que deseas administrar:
+    </MudText>
+
+    <MudGrid Justify="Justify.Center" Spacing="3">
+        <!-- OBJETIVOS GENERALES -->
+        <MudItem xs="12" sm="6" md="4">
+            <MudCard Style="cursor:pointer; border-radius:20px;" Class="hover-elevate-8"
+                     @onclick="@(() => Navigation.NavigateTo("/objetivosGenerales"))">
+                <MudCardContent Class="pa-4">
+                    <MudIcon Icon="@Icons.Material.Filled.Public" Color="Color.Primary" Style="font-size:56px;" />
+                    <MudText Typo="Typo.h6" Class="mt-3" Style="color:#002851;">Generales</MudText>
+                    <MudText Typo="Typo.body2">Metas anuales globales del complejo (Dashboard)</MudText>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+
+        <!-- OBJETIVOS ANUALES -->
+        <MudItem xs="12" sm="6" md="4">
+            <MudCard Style="cursor:pointer; border-radius:20px;" Class="hover-elevate-8"
+                     @onclick="@(() => Navigation.NavigateTo("/objetivosAnuales"))">
+                <MudCardContent Class="pa-4">
+                    <MudIcon Icon="@Icons.Material.Filled.CalendarMonth" Color="Color.Info" Style="font-size:56px;" />
+                    <MudText Typo="Typo.h6" Class="mt-3" Style="color:#002851;">Anuales</MudText>
+                    <MudText Typo="Typo.body2">Metas de ocupación por cabaña (por año)</MudText>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+
+        <!-- OBJETIVOS MENSUALES -->
+        <MudItem xs="12" sm="6" md="4">
+            <MudCard Style="cursor:pointer; border-radius:20px;" Class="hover-elevate-8"
+                     @onclick="@(() => Navigation.NavigateTo("/objetivosMensuales"))">
+                <MudCardContent Class="pa-4">
+                    <MudIcon Icon="@Icons.Material.Filled.DateRange" Color="Color.Secondary" Style="font-size:56px;" />
+                    <MudText Typo="Typo.h6" Class="mt-3" Style="color:#002851;">Mensuales</MudText>
+                    <MudText Typo="Typo.body2">Metas de ocupación por cabaña (por mes)</MudText>
+                </MudCardContent>
+            </MudCard>
+        </MudItem>
+    </MudGrid>
+</MudPaper>
+
+@code {
+
+}

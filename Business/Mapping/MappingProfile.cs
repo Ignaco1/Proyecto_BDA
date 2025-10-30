@@ -15,9 +15,13 @@ namespace Business.Mapping
         public MappingProfile() 
         {
             CreateMap<User, UserResponseDto>();
-            CreateMap<Objetivo, ObjetivoResponseDto>();
+            CreateMap<Objetivo, ObjetivoResponseDto>()
+                .ForMember(dest => dest.NombreCabaña,
+                           opt => opt.MapFrom(src => src.Cabaña != null ? src.Cabaña.Nombre : null));
             CreateMap<AddObjetivoDto, Objetivo>();
             CreateMap<UpdateObjetivoDto, Objetivo>();
+            CreateMap<Cabaña, CabañaResponseDto>();
+
         }
     }
 }

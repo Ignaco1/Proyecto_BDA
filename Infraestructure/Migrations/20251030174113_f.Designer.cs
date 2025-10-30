@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infraestructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20251021171022_Primera")]
-    partial class Primera
+    [Migration("20251030174113_f")]
+    partial class f
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -83,7 +83,7 @@ namespace Infraestructure.Migrations
 
                     b.HasIndex("ReservaId", "Fecha");
 
-                    b.ToTable("Cancelacion");
+                    b.ToTable("Cancelaciones");
                 });
 
             modelBuilder.Entity("Domain.Entities.Cliente", b =>
@@ -130,14 +130,17 @@ namespace Infraestructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<bool>("Activo")
-                        .HasColumnType("bit");
-
                     b.Property<int>("Año")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("FechaCreacion")
                         .HasColumnType("datetime2");
+
+                    b.Property<int?>("IdCabaña")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
 
                     b.Property<int?>("Mes")
                         .HasColumnType("int");
@@ -145,15 +148,20 @@ namespace Infraestructure.Migrations
                     b.Property<decimal>("MetaOcupacion")
                         .HasColumnType("decimal(5,2)");
 
+                    b.Property<int>("Tipo")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("IdCabaña");
 
                     b.HasIndex("Año", "Mes")
                         .IsUnique()
-                        .HasFilter("[Activo] = 1");
+                        .HasFilter("[IsActive] = 1");
 
-                    b.HasIndex("Año", "Mes", "Activo");
+                    b.HasIndex("Año", "Mes", "IsActive");
 
-                    b.ToTable("Objetivo");
+                    b.ToTable("Objetivos");
                 });
 
             modelBuilder.Entity("Domain.Entities.Reserva", b =>
@@ -242,6 +250,15 @@ namespace Infraestructure.Migrations
                         .IsRequired();
 
                     b.Navigation("Reserva");
+                });
+
+            modelBuilder.Entity("Domain.Entities.Objetivo", b =>
+                {
+                    b.HasOne("Domain.Entities.Cabaña", "Cabaña")
+                        .WithMany()
+                        .HasForeignKey("IdCabaña");
+
+                    b.Navigation("Cabaña");
                 });
 
             modelBuilder.Entity("Domain.Entities.Reserva", b =>

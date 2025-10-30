@@ -1,23 +1,31 @@
-﻿@page "/Objetivos"
+﻿@page "/objetivosGenerales"
 
+@using Domain.Enums
+@using Domain.DTOs.Responses
 @inject IRequestService RequestService
 @inject ISnackbar Snackbar
 @inject NavigationManager NavigationManager
 @inject IDialogService DialogService
 
-<PageTitle>Objetivos</PageTitle>
+<PageTitle>Objetivos — Generales</PageTitle>
 
-<!-- Botón agregar -->
+<MudStack Class="mb-3" Row="true" Justify="Justify.FlexStart">
+    <MudText Typo="Typo.h5" Class="text-vita-dark fw-bold">
+        Lista de objetivos generales
+    </MudText>
+</MudStack>
+
+
 <MudStack Class="mb-3" Row="true" Justify="Justify.FlexStart">
     <MudButton Class="btn-vita"
                Variant="Variant.Filled"
                StartIcon="@Icons.Material.Filled.Add"
-               OnClick="AddOpenDialog">
-        Nuevo Objetivo
+               OnClick="AddOpenDialogGeneral">
+        Nuevo objetivo general
     </MudButton>
 </MudStack>
 
-@if (_objetivos == null)
+@if (_objetivosGenerales == null)
 {
     <div class="d-flex justify-center align-center" style="height: 60vh;">
         <Loading />
@@ -29,7 +37,6 @@ else
         <HeaderContent>
             <MudTh><MudTableSortLabel SortBy="new Func<ObjetivoResponseDto, object>(x => x.Id)">Id</MudTableSortLabel></MudTh>
             <MudTh><MudTableSortLabel SortBy="new Func<ObjetivoResponseDto, object>(x => x.Año)">Año</MudTableSortLabel></MudTh>
-            <MudTh><MudTableSortLabel SortBy="new Func<ObjetivoResponseDto, object>(x => x.Mes)">Mes</MudTableSortLabel></MudTh>
             <MudTh><MudTableSortLabel SortBy="new Func<ObjetivoResponseDto, object>(x => x.MetaOcupacion)">Meta Ocupación</MudTableSortLabel></MudTh>
             <MudTh><MudTableSortLabel SortBy="new Func<ObjetivoResponseDto, object>(x => x.FechaCreacion)">Fecha Creación</MudTableSortLabel></MudTh>
             <MudTh><MudTableSortLabel SortBy="new Func<ObjetivoResponseDto, object>(x => x.IsActive)">Estado</MudTableSortLabel></MudTh>
@@ -39,7 +46,6 @@ else
         <RowTemplate>
             <MudTd DataLabel="Id">@context.Id</MudTd>
             <MudTd DataLabel="Año">@context.Año</MudTd>
-            <MudTd DataLabel="Mes">@context.Mes</MudTd>
             <MudTd DataLabel="Meta Ocupación">@($"{context.MetaOcupacion}%")</MudTd>
             <MudTd DataLabel="Fecha Creación">@context.FechaCreacion.ToString("dd/MM/yyyy")</MudTd>
 
@@ -58,7 +64,7 @@ else
                 <MudIconButton Icon="@Icons.Material.Filled.Edit"
                                Color="Color.Default"
                                Style="color:#4a4a4a"
-                               OnClick="() => OpenEditObjetivo(context)"
+                               OnClick="() => OpenEditObjetivoGeneral(context)"
                                Size="Size.Small" />
             </MudTd>
         </RowTemplate>
@@ -70,48 +76,44 @@ else
 }
 
 @code {
-    private IEnumerable<ObjetivoResponseDto>? _objetivos;
+    private IEnumerable<ObjetivoResponseDto>? _objetivosGenerales;
     private IEnumerable<ObjetivoResponseDto>? _objetivosOrdenados;
 
-    protected override async Task OnInitializedAsync() => await LoadObjetivos();
+    protected override async Task OnInitializedAsync() => await LoadObjetivosGenerales();
 
-    private async Task LoadObjetivos()
+    private async Task LoadObjetivosGenerales()
     {
         try
         {
-            _objetivos = await RequestService.GetAsync<IEnumerable<ObjetivoResponseDto>>("api/objetivos");
+            var todos = await RequestService.GetAsync<IEnumerable<ObjetivoResponseDto>>("api/objetivos");
+            _objetivosGenerales = todos?.Where(o => o.Tipo == TipoObjetivo.General);
 
-            _objetivosOrdenados = _objetivos?
-            .OrderByDescending(o => o.FechaCreacion)
-            .ThenByDescending(o => o.Año)
-            .ThenByDescending(o => o.Mes ?? 0)
-            .ToList();
-
+            _objetivosOrdenados = _objetivosGenerales?
+                .OrderByDescending(o => o.FechaCreacion)
+                .ThenByDescending(o => o.Año)
+                .ToList();
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"Error al cargar los objetivos: {ex.Message}", Severity.Error);
+            Snackbar.Add($"Error al cargar los objetivos generales: {ex.Message}", Severity.Error);
         }
     }
 
-    private async Task AddOpenDialog()
+    private async Task AddOpenDialogGeneral()
     {
         try
         {
-            var options = new DialogOptions
-            {
-                CloseButton = true,
-                MaxWidth = MaxWidth.ExtraSmall,
-                FullWidth = true
-            };
+            var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.ExtraSmall, FullWidth = true };
 
-            var dialog = await DialogService.ShowAsync<AddObjetivo>("", options);
+            var parameters = new DialogParameters { ["TipoObjetivoSeleccionado"] = TipoObjetivo.General };
+
+            var dialog = await DialogService.ShowAsync<AddObjetivo>("", parameters, options);
             var result = await dialog.Result;
 
             if (!result!.Canceled)
             {
-                await LoadObjetivos();
-                Snackbar.Add("El nuevo objetivo se creó exitosamente.", Severity.Success);
+                await LoadObjetivosGenerales();
+                Snackbar.Add("Objetivo general creado exitosamente.", Severity.Success);
             }
         }
         catch (Exception ex)
@@ -120,7 +122,7 @@ else
         }
     }
 
-    private async Task OpenEditObjetivo(ObjetivoResponseDto objetivo)
+    private async Task OpenEditObjetivoGeneral(ObjetivoResponseDto objetivo)
     {
         try
         {
@@ -138,8 +140,8 @@ else
 
             if (!result!.Canceled)
             {
-                await LoadObjetivos();
-                Snackbar.Add("Objetivo actualizado exitosamente.", Severity.Success);
+                await LoadObjetivosGenerales();
+                Snackbar.Add("Objetivo general actualizado exitosamente.", Severity.Success);
             }
         }
         catch (Exception ex)

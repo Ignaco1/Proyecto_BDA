@@ -1,13 +1,13 @@
-﻿@inject IRequestService RequestService
+﻿@using Domain.Enums
+@inject IRequestService RequestService
 @inject ISnackbar Snackbar
 
 <MudDialog MaxWidth="MaxWidth.Small" FullWidth="true">
     <TitleContent>
         <div style="display:flex;align-items:center;gap:12px;padding:4px 0;">
-            <!-- Ícono del título en azul Vita -->
             <MudIcon Icon="@Icons.Material.Filled.Edit" Class="icon-vita" Size="Size.Medium" />
             <MudText Typo="Typo.h5" Style="margin:0;font-weight:500;">
-                Editar Objetivo
+                @(EsGeneral ? "Editar objetivo general" : "Editar objetivo")
             </MudText>
         </div>
     </TitleContent>
@@ -15,8 +15,6 @@
     <DialogContent>
         <MudContainer Style="padding:0;">
             <MudGrid Spacing="3">
-
-                <!-- Año -->
                 <MudItem xs="12" md="6">
                     <MudTextField @bind-Value="_updateObjetivoDto.Año"
                                   Class="vita-adorn"
@@ -31,29 +29,28 @@
                                   AdornmentColor="Color.Default" />
                 </MudItem>
 
-                <!-- Mes -->
-                <MudItem xs="12" md="6">
-                    <MudTextField @bind-Value="_updateObjetivoDto.Mes"
-                                  Class="vita-adorn"
-                                  Label="Mes"
-                                  Variant="Variant.Outlined"
-                                  Type="number"
-                                  HelperText="Ingrese el número de mes (1-12)"
-                                  Adornment="Adornment.Start"
-                                  AdornmentIcon="@Icons.Material.Filled.DateRange"
-                                  AdornmentColor="Color.Default" />
-                </MudItem>
+                @if (!EsGeneral)
+                {
+                    <MudItem xs="12" md="6">
+                        <MudTextField @bind-Value="_updateObjetivoDto.Mes"
+                                      Class="vita-adorn"
+                                      Label="Mes"
+                                      Variant="Variant.Outlined"
+                                      Type="number"
+                                      HelperText="Ingrese el número de mes (1-12)"
+                                      Adornment="Adornment.Start"
+                                      AdornmentIcon="@Icons.Material.Filled.DateRange"
+                                      AdornmentColor="Color.Default" />
+                    </MudItem>
+                }
 
-                <!-- Meta de Ocupación -->
                 <MudItem xs="12">
                     <MudTextField @bind-Value="_updateObjetivoDto.MetaOcupacion"
                                   Class="vita-adorn"
                                   Label="Meta de Ocupación (%)"
                                   Variant="Variant.Outlined"
                                   Type="number"
-                                  Min="0"
-                                  Max="100"
-                                  Step="0.5"
+                                  Min="0" Max="100" Step="0.5"
                                   Required="true"
                                   RequiredError="La meta de ocupación es requerida"
                                   HelperText="Ingrese un valor entre 0 y 100"
@@ -62,17 +59,14 @@
                                   AdornmentColor="Color.Default" />
                 </MudItem>
 
-                <!-- Separador visual -->
                 <MudItem xs="12">
                     <MudDivider Style="margin:8px 0;" />
                 </MudItem>
-
             </MudGrid>
         </MudContainer>
     </DialogContent>
 
     <DialogActions>
-        <!-- Botón Cancelar (gris neutro) -->
         <MudButton OnClick="Cancel"
                    Variant="Variant.Text"
                    StartIcon="@Icons.Material.Filled.Cancel"
@@ -82,7 +76,6 @@
             Cancelar
         </MudButton>
 
-        <!-- Botón Guardar (azul oscuro Vita) -->
         <MudButton OnClick="SaveChanges"
                    Variant="Variant.Filled"
                    StartIcon="@Icons.Material.Filled.Save"
@@ -95,13 +88,11 @@
 </MudDialog>
 
 @code {
-    [CascadingParameter]
-    private IMudDialogInstance MudDialog { get; set; } = default!;
-
-    [Parameter]
-    public ObjetivoResponseDto objetivo { get; set; } = default!;
+    [CascadingParameter] private IMudDialogInstance MudDialog { get; set; } = default!;
+    [Parameter] public ObjetivoResponseDto objetivo { get; set; } = default!;
 
     private UpdateObjetivoDto _updateObjetivoDto = new();
+    private bool EsGeneral => objetivo.Tipo == TipoObjetivo.General; 
 
     protected override void OnInitialized()
     {
@@ -111,14 +102,14 @@
             Año = objetivo.Año,
             Mes = objetivo.Mes,
             MetaOcupacion = objetivo.MetaOcupacion,
-            FechaCreacion = objetivo.FechaCreacion
+            FechaCreacion = objetivo.FechaCreacion,
+            IsActive = objetivo.IsActive,
+            Tipo = objetivo.Tipo,         
+            IdCabaña = objetivo.IdCabaña  
         };
     }
 
-    private void Cancel()
-    {
-        MudDialog.Cancel();
-    }
+    private void Cancel() => MudDialog.Cancel();
 
     private async Task SaveChanges()
     {

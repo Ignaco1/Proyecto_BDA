@@ -1,4 +1,5 @@
-﻿@inject IRequestService RequestService
+﻿@using Domain.Enums
+@inject IRequestService RequestService
 @inject ISnackbar Snackbar
 @inject NavigationManager NavigationManager
 
@@ -7,7 +8,7 @@
         <div style="display:flex;align-items:center;gap:12px;padding:4px 0;">
             <MudIcon Icon="@Icons.Material.Filled.Edit" Class="icon-vita" Size="Size.Medium" />
             <MudText Typo="Typo.h5" Style="margin:0;font-weight:500;">
-                Editar Objetivo
+                @(EsGeneral ? "Crear objetivo general" : "Crear objetivo")
             </MudText>
         </div>
     </TitleContent>
@@ -15,8 +16,7 @@
     <DialogContent>
         <MudContainer Style="padding:0;">
             <MudGrid Spacing="3">
-
-                <!-- Año -->
+                <!-- Año (siempre) -->
                 <MudItem xs="12" md="6">
                     <MudTextField @bind-Value="_objetivoDto.Año"
                                   Class="vita-adorn"
@@ -31,29 +31,30 @@
                                   AdornmentColor="Color.Default" />
                 </MudItem>
 
-                <!-- Mes -->
-                <MudItem xs="12" md="6">
-                    <MudTextField @bind-Value="_objetivoDto.Mes"
-                                  Class="vita-adorn"
-                                  Label="Mes"
-                                  Variant="Variant.Outlined"
-                                  Type="number"
-                                  HelperText="Ingrese el número de mes (1-12)"
-                                  Adornment="Adornment.Start"
-                                  AdornmentIcon="@Icons.Material.Filled.DateRange"
-                                  AdornmentColor="Color.Default" />
-                </MudItem>
+                <!-- Mes (solo si NO es general) -->
+                @if (!EsGeneral)
+                {
+                    <MudItem xs="12" md="6">
+                        <MudTextField @bind-Value="_objetivoDto.Mes"
+                                      Class="vita-adorn"
+                                      Label="Mes"
+                                      Variant="Variant.Outlined"
+                                      Type="number"
+                                      HelperText="Ingrese el número de mes (1-12)"
+                                      Adornment="Adornment.Start"
+                                      AdornmentIcon="@Icons.Material.Filled.DateRange"
+                                      AdornmentColor="Color.Default" />
+                    </MudItem>
+                }
 
-                <!-- Meta de Ocupación -->
+                <!-- Meta de Ocupación (siempre) -->
                 <MudItem xs="12">
                     <MudTextField @bind-Value="_objetivoDto.MetaOcupacion"
                                   Class="vita-adorn"
                                   Label="Meta de Ocupación (%)"
                                   Variant="Variant.Outlined"
                                   Type="number"
-                                  Min="0"
-                                  Max="100"
-                                  Step="0.5"
+                                  Min="0" Max="100" Step="0.5"
                                   Required="true"
                                   RequiredError="La meta de ocupación es requerida"
                                   HelperText="Ingrese un valor entre 0 y 100"
@@ -65,7 +66,6 @@
                 <MudItem xs="12">
                     <MudDivider Style="margin:8px 0;" />
                 </MudItem>
-
             </MudGrid>
         </MudContainer>
     </DialogContent>
@@ -90,17 +90,27 @@
         </MudButton>
     </DialogActions>
 </MudDialog>
+
 @code {
-    [CascadingParameter]
-    private IMudDialogInstance MudDialog { get; set; } = null!;
+    [CascadingParameter] private IMudDialogInstance MudDialog { get; set; } = null!;
+
+    [Parameter] public TipoObjetivo TipoObjetivoSeleccionado { get; set; } = TipoObjetivo.General;
+
+    private bool EsGeneral => TipoObjetivoSeleccionado == TipoObjetivo.General;
 
     private AddObjetivoDto _objetivoDto = new();
 
     private async Task SaveChanges()
     {
-
         try
         {
+            _objetivoDto.Tipo = TipoObjetivoSeleccionado;
+
+            if (EsGeneral)
+            {
+                _objetivoDto.Mes = null;
+                _objetivoDto.IdCabaña = null;
+            }
 
             var response = await RequestService.PostAsync("api/objetivos", _objetivoDto);
 
@@ -121,8 +131,5 @@
         }
     }
 
-    private void Cancel()
-    {
-        MudDialog.Cancel();
-    }
+    private void Cancel() => MudDialog.Cancel();
 }

@@ -23,12 +23,16 @@ namespace Infraestructure.Repositories
 
         public async Task<List<Objetivo>> GetAllAsync()
         {
-            return await _context.Objetivos.ToListAsync();
+            return await _context.Objetivos
+                .Include(o => o.Cabaña)
+                .ToListAsync();
         }
 
         public async Task<Objetivo> GetByIdAsync(int id)
         {
-            return (await _context.Objetivos.FindAsync(id));
+            return await _context.Objetivos
+                .Include(o => o.Cabaña)
+                .FirstOrDefaultAsync(o => o.Id == id);  
         }
 
         public async Task UpdateAsync(Objetivo objetivo)

@@ -1,0 +1,63 @@
+﻿@page "/cabañas"
+
+@inject IRequestService RequestService
+@inject ISnackbar Snackbar
+
+<PageTitle>Cabañas</PageTitle>
+
+<MudStack Class="mb-3" Row="true" Justify="Justify.FlexStart">
+    <MudText Typo="Typo.h5" Class="text-vita-dark fw-bold">
+        Lista de Cabañas
+    </MudText>
+</MudStack>
+
+@if (_cabañas == null)
+{
+    <div class="d-flex justify-center align-center" style="height: 60vh;">
+        <Loading />
+    </div>
+}
+else
+{
+    <MudTable Items="_cabañas" Hover="true" Elevation="2" Dense="true">
+        <HeaderContent>
+            <MudTh>Nombre</MudTh>
+            <MudTh>Capacidad</MudTh>
+            <MudTh>Precio por Noche</MudTh>
+            <MudTh>Descripción</MudTh>
+            <MudTh>Estado</MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd>@context.Nombre</MudTd>
+            <MudTd>@context.Capacidad</MudTd>
+            <MudTd>@context.PrecioPorNoche.ToString("C", new System.Globalization.CultureInfo("es-AR"))</MudTd>
+            <MudTd>@context.Descripcion</MudTd>
+            <MudTd>
+                @if (context.IsActive)
+                {
+                    <MudChip T="string" Color="Color.Success" Variant="Variant.Filled" Label="true">Activo</MudChip>
+                }
+                else
+                {
+                    <MudChip T="string" Color="Color.Error" Variant="Variant.Outlined" Label="true">Inactivo</MudChip>
+                }
+            </MudTd>
+        </RowTemplate>
+    </MudTable>
+}
+
+@code {
+    private IEnumerable<CabañaResponseDto>? _cabañas;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            _cabañas = await RequestService.GetAsync<IEnumerable<CabañaResponseDto>>("api/cabañas");
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error al cargar las cabañas: {ex.Message}", Severity.Error);
+        }
+    }
+}

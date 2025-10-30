@@ -34,11 +34,13 @@ namespace Api
             //repositories
             builder.Services.AddScoped<IUserRepository, UserRepository>();
             builder.Services.AddScoped<IObjetivoRepository, ObjetivoRepository>();
+            builder.Services.AddScoped<ICabañaRepository, CabañaRepository>();
 
             //services
             builder.Services.AddScoped<IAuthService, AuthService>();
             builder.Services.AddScoped<ITokenService, TokenService>();
             builder.Services.AddScoped<IObjetivoService, ObjetivoService>();
+            builder.Services.AddScoped<ICabañaService, CabañaService>();
 
             //autenticacion
             var key = builder.Configuration["Jwt:key"];

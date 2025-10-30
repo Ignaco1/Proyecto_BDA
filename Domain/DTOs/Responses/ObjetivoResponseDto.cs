@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Domain.Enums; 
+using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Domain.DTOs.Responses
 {
@@ -17,6 +14,11 @@ namespace Domain.DTOs.Responses
         [Range(0, 100)]
         [Column(TypeName = "decimal(5,2)")]
         public decimal MetaOcupacion { get; set; }
+
+        public TipoObjetivo Tipo { get; set; } = TipoObjetivo.General; 
+        public int? IdCabaña { get; set; }
+        public string? NombreCabaña { get; set; }
+
         public DateTime FechaCreacion { get; set; } = DateTime.Now;
         public bool IsActive { get; set; } = true;
     }
