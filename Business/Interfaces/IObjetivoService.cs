@@ -13,7 +13,11 @@ namespace Business.Interfaces
     {
         Task<ObjetivoResponseDto> GetObjetivoByIdAsync(int id);
         Task<ObjetivoResponseDto> CreateObjetivoAsync(AddObjetivoDto AddObjetivoDto);
+        Task<ObjetivoResponseDto> CreateObjetivoAnualAsync(AddObjetivoDto AddObjetivoDto);
+        Task<ObjetivoResponseDto> CreateObjetivoMensualAsync(AddObjetivoDto AddObjetivoDto);
         Task<List<ObjetivoResponseDto>> GetAllObjetivosAsync();
+        Task<List<ObjetivoResponseDto>> GetObjetivosAnualesAsync();
+        Task<List<ObjetivoResponseDto>> GetObjetivosMensualesAsync();
         Task UpdateObjetivoAsync(UpdateObjetivoDto UpdateObjetivoDto);
     }
 }

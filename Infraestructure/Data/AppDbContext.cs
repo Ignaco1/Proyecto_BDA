@@ -64,9 +64,23 @@ namespace Infraestructure.Data
             modelBuilder.Entity<Objetivo>(e =>
             {
                 e.Property(x => x.MetaOcupacion).HasColumnType("decimal(5,2)");
-                e.HasIndex(x => new { x.Año, x.Mes, x.IsActive });
-                e.HasIndex(x => new { x.Año, x.Mes }).IsUnique().HasFilter("[IsActive] = 1");
+
+                e.HasIndex(o => o.Año)
+                    .HasFilter("[Tipo] = 0 AND [Mes] IS NULL AND [IdCabaña] IS NULL")
+                    .IsUnique()
+                    .HasDatabaseName("UX_Objetivos_General_Año");
+
+                e.HasIndex(o => new { o.IdCabaña, o.Año })
+                    .HasFilter("[Tipo] = 1 AND [Mes] IS NULL")
+                    .IsUnique()
+                    .HasDatabaseName("UX_Objetivos_Anual_Cabaña_Año");
+
+                e.HasIndex(o => new { o.IdCabaña, o.Año, o.Mes })
+                    .HasFilter("[Tipo] = 2")
+                    .IsUnique()
+                    .HasDatabaseName("UX_Objetivos_Mensual_Cabaña_AñoMes");
             });
+
 
             modelBuilder.Entity<Cancelacion>(e =>
             {

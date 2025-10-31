@@ -71,11 +71,59 @@ namespace Business.Services
             return _mapper.Map<ObjetivoResponseDto>(creado);
         }
 
+        public async Task<ObjetivoResponseDto> CreateObjetivoAnualAsync(AddObjetivoDto Dto)
+        {
+            if (Dto == null) throw new ArgumentException("El objetivo no puede ser nulo.");
+
+            if (Dto.IdCabaña is null || Dto.IdCabaña <= 0)
+                throw new ArgumentException("Debe seleccionar una cabaña para un objetivo anual.");
+            if (Dto.Año <= 0) throw new ArgumentException("El campo 'Año' debe ser mayor que cero.");
+            if (Dto.Año > DateTime.Now.Year) throw new ArgumentException("El año no puede ser mayor al actual.");
+
+            Dto.Tipo = TipoObjetivo.Anual;
+            Dto.Mes = null;                
+
+            if (Dto.MetaOcupacion <= 0) throw new ArgumentException("La 'Meta de Ocupación' debe ser mayor que cero.");
+            if (Dto.MetaOcupacion > 100) throw new ArgumentException("La 'Meta de Ocupación' no puede superar el 100%.");
+
+            var existentes = await _objetivoRepository.GetAllAsync();
+            var duplicado = existentes.Any(o =>
+                o.Tipo == TipoObjetivo.Anual &&
+                o.IdCabaña == Dto.IdCabaña &&
+                o.Año == Dto.Año);
+
+            if (duplicado)
+                throw new InvalidOperationException($"Ya existe un objetivo anual para la cabaña {Dto.IdCabaña} en {Dto.Año}.");
+
+            var entity = _mapper.Map<Objetivo>(Dto);
+            entity.FechaCreacion = DateTime.Now;
+            entity.IsActive = true;
+
+            var creado = await _objetivoRepository.AddAsync(entity);
+            return _mapper.Map<ObjetivoResponseDto>(creado);
+        }
+        
+
+        public Task<ObjetivoResponseDto> CreateObjetivoMensualAsync(AddObjetivoDto AddObjetivoDto)
+        {
+            throw new NotImplementedException();
+        }
 
         public async Task<List<ObjetivoResponseDto>> GetAllObjetivosAsync()
         {
             var objetivos = await _objetivoRepository.GetAllAsync();
             return _mapper.Map<List<ObjetivoResponseDto>>(objetivos);
+        }
+        public async Task<List<ObjetivoResponseDto>> GetObjetivosAnualesAsync()
+        {
+            var all = await _objetivoRepository.GetAllAsync();
+            var anuales = all.Where(o => o.Tipo == TipoObjetivo.Anual).ToList();
+            return _mapper.Map<List<ObjetivoResponseDto>>(anuales);
+        }
+
+        public async Task<List<ObjetivoResponseDto>> GetObjetivosMensualesAsync()
+        {
+            throw new NotImplementedException();
         }
 
         public async Task<ObjetivoResponseDto> GetObjetivoByIdAsync(int id)
@@ -107,7 +155,7 @@ namespace Business.Services
                     break;
 
                 case TipoObjetivo.Anual:
-                    if (dto.IdCabaña is null) throw new ArgumentException("Debe seleccionar una cabaña.");
+                    if (dto.IdCabaña is null || dto.IdCabaña <= 0) throw new ArgumentException("Debe seleccionar una cabaña.");
                     dto.Mes = null;
                     if (todos.Any(o => o.Id != dto.Id && o.Tipo == TipoObjetivo.Anual && o.Año == dto.Año && o.IdCabaña == dto.IdCabaña))
                         throw new Exception($"Ya existe un objetivo anual para esa cabaña en {dto.Año}.");

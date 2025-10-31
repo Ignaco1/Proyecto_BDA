@@ -1,5 +1,6 @@
 ﻿using Business.Interfaces;
 using Domain.DTOs.Requests;
+using Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -20,6 +21,14 @@ namespace Api.Controllers
         {
             var objetivos = await _IObjetivoService.GetAllObjetivosAsync();
             return Ok(objetivos);
+        }
+
+        [HttpGet("anuales")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetAnuales()
+        {
+            var items = await _IObjetivoService.GetObjetivosAnualesAsync();
+            return Ok(items);
         }
 
         [HttpGet("{id}")]
@@ -72,6 +81,26 @@ namespace Api.Controllers
                     Content = "Error interno: " + ex.Message,
                     ContentType = "text/plain"
                 };
+            }
+        }
+
+        [HttpPost("anuales")]
+        public async Task<IActionResult> CreateAnual([FromBody] AddObjetivoDto dto)
+        {
+            try
+            {
+                dto.Tipo = TipoObjetivo.Anual;
+                dto.Mes = null; 
+                var created = await _IObjetivoService.CreateObjetivoAnualAsync(dto);
+                return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(new { message = ex.Message });
             }
         }
 

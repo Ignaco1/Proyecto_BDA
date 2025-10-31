@@ -1,0 +1,72 @@
+﻿@inject IRequestService RequestService
+@inject ISnackbar Snackbar
+
+<MudDialog MaxWidth="MaxWidth.ExtraSmall" FullWidth="true">
+    <TitleContent>
+        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
+            <MudIcon Icon="@Icons.Material.Filled.Edit" Class="icon-vita" />
+            <MudText Typo="Typo.h6">Editar Objetivo Anual</MudText>
+        </MudStack>
+        <MudText Typo="Typo.body2" Class="mt-1">Cabaña: <b>@Objetivo.NombreCabaña</b></MudText>
+    </TitleContent>
+
+    <DialogContent>
+        <MudGrid Spacing="2">
+            <MudItem xs="12">
+                <MudTextField @bind-Value="_dto.Año"
+                              Label="Año"
+                              Variant="Variant.Outlined"
+                              Type="number" />
+            </MudItem>
+            <MudItem xs="12">
+                <MudTextField @bind-Value="_dto.MetaOcupacion"
+                              Label="Meta de ocupación (%)"
+                              Variant="Variant.Outlined"
+                              Type="number"
+                              Min="0" Max="100" Step="0.5" />
+            </MudItem>
+        </MudGrid>
+    </DialogContent>
+
+    <DialogActions>
+        <MudButton Variant="Variant.Text" OnClick="Cancel" StartIcon="@Icons.Material.Filled.Cancel">Cancelar</MudButton>
+        <MudButton Class="btn-vita" Variant="Variant.Filled" OnClick="Save" StartIcon="@Icons.Material.Filled.Save">Guardar</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] private IMudDialogInstance MudDialog { get; set; } = default!;
+    [Parameter] public ObjetivoResponseDto Objetivo { get; set; } = default!;
+
+    private UpdateObjetivoDto _dto = new();
+
+    protected override void OnInitialized()
+    {
+        _dto = new UpdateObjetivoDto
+        {
+            Id = Objetivo.Id,
+            Año = Objetivo.Año,
+            MetaOcupacion = Objetivo.MetaOcupacion,
+            FechaCreacion = Objetivo.FechaCreacion,
+            IdCabaña = Objetivo.IdCabaña 
+        };
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+
+    private async Task Save()
+    {
+        try
+        {
+            var response = await RequestService.PutAsync($"api/objetivos/{_dto.Id}", _dto);
+            if (response.IsSuccessStatusCode)
+                MudDialog.Close(DialogResult.Ok(true));
+            else
+                Snackbar.Add(await response.Content.ReadAsStringAsync(), Severity.Error);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error al actualizar: {ex.Message}", Severity.Error);
+        }
+    }
+}

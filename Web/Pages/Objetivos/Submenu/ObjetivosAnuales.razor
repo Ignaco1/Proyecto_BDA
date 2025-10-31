@@ -1,9 +1,102 @@
 ﻿@page "/objetivosAnuales"
 
+@using Web.Pages.Objetivos.Operaciones
+@inject IRequestService RequestService
+@inject ISnackbar Snackbar
+@inject IDialogService DialogService
+@inject NavigationManager Nav
+
 <PageTitle>Objetivos Anuales</PageTitle>
 
-<h1>Bienvenido a los objetivos anuales!</h1>
+<MudStack Class="mb-3" Row="true" Justify="Justify.FlexStart">
+    <MudText Typo="Typo.h5" Class="text-vita-dark fw-bold">
+        Lista de cabañas
+    </MudText>
+</MudStack>
+
+<MudStack Row="true" Class="mb-3" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+    <MudButton Class="btn-vita"
+               Variant="Variant.Filled"
+               StartIcon="@Icons.Material.Filled.ListAlt"
+               OnClick="@(() => Nav.NavigateTo("/objetivosAnualesList"))">
+        Ver objetivos anuales
+    </MudButton>
+</MudStack>
+
+@if (_cabañas is null)
+{
+    <div class="d-flex justify-center align-center" style="height:60vh;"><Loading /></div>
+}
+else
+{
+    <MudTable Items="_cabañas" Hover="true" Dense="true" RowClick="OnRowClick">
+    <HeaderContent>
+        <MudTh>Nombre</MudTh> 
+        <MudTh>Capacidad</MudTh>
+        <MudTh>Precio/Noche</MudTh>
+        <MudTh>Descripción</MudTh>
+        <MudTh>Estado</MudTh>
+        <MudTh></MudTh>            
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd DataLabel="Nombre">@context.Nombre</MudTd>
+        <MudTd DataLabel="Capacidad">@context.Capacidad</MudTd>
+        <MudTd DataLabel="Precio/Noche">
+            @context.PrecioPorNoche.ToString("C", new System.Globalization.CultureInfo("es-AR"))
+        </MudTd>
+        <MudTd DataLabel="Descripción">@context.Descripcion</MudTd>
+        <MudTd DataLabel="Estado">
+            @if (context.IsActive)
+            {
+                    <MudChip T="string" Color="Color.Success" Variant="Variant.Filled" Label="true">Activo</MudChip>
+            }
+            else
+            {
+                    <MudChip T="string" Color="Color.Error" Variant="Variant.Outlined" Label="true">Inactivo</MudChip>
+            }
+        </MudTd>
+        <MudTd>
+            <MudButton Variant="Variant.Outlined"
+                       StartIcon="@Icons.Material.Filled.Add"
+                       OnClick="@(() => OpenAddDialog(context))">
+                Nuevo objetivo
+            </MudButton>
+        </MudTd>
+    </RowTemplate>
+    <PagerContent><MudTablePager /></PagerContent>
+</MudTable>
+
+}
 
 @code {
+    private List<CabañaResponseDto>? _cabañas;
 
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            _cabañas = await RequestService.GetAsync<List<CabañaResponseDto>>("api/cabañas");
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error al cargar cabañas: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private async Task OpenAddDialog(CabañaResponseDto cab)
+    {
+        var parameters = new DialogParameters { ["CabañaSeleccionada"] = cab };
+        var options = new DialogOptions { CloseButton = true, FullWidth = true, MaxWidth = MaxWidth.ExtraSmall };
+
+        var dialog = await DialogService.ShowAsync<AddObjetivoAnualCabaña>("Nuevo objetivo anual", parameters, options);
+        var result = await dialog.Result;
+
+        if (result is { Canceled: false })
+            Snackbar.Add($"Objetivo anual creado para {cab.Nombre}.", Severity.Success);
+    }
+
+    private async Task OnRowClick(TableRowClickEventArgs<CabañaResponseDto> e)
+    {
+        await OpenAddDialog(e.Item);
+    }
 }

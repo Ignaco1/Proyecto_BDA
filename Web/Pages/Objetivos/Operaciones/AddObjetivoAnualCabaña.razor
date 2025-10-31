@@ -1,0 +1,81 @@
+﻿@inject IRequestService RequestService
+@inject ISnackbar Snackbar
+
+<MudDialog MaxWidth="MaxWidth.ExtraSmall" FullWidth="true">
+    <TitleContent>
+        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
+            <MudIcon Icon="@Icons.Material.Filled.Flag" Class="icon-vita" />
+            <MudText Typo="Typo.h6">Nuevo objetivo anual</MudText>
+        </MudStack>
+        <MudText Typo="Typo.body2" Class="mt-1">Cabaña: <b>@CabañaSeleccionada?.Nombre</b></MudText>
+    </TitleContent>
+
+    <DialogContent>
+        <MudGrid Spacing="2">
+            <MudItem xs="12">
+                <MudTextField @bind-Value="_dto.Año"
+                              Label="Año"
+                              Variant="Variant.Outlined"
+                              Type="number"
+                              Required="true"
+                              RequiredError="El año es requerido"
+                              HelperText="Ej: 2025" />
+            </MudItem>
+
+            <MudItem xs="12">
+                <MudTextField @bind-Value="_dto.MetaOcupacion"
+                              Label="Meta de ocupación (%)"
+                              Variant="Variant.Outlined"
+                              Type="number"
+                              Min="0" Max="100" Step="0.5"
+                              Required="true"
+                              RequiredError="La meta es requerida" />
+            </MudItem>
+        </MudGrid>
+    </DialogContent>
+
+    <DialogActions>
+        <MudButton Variant="Variant.Text" OnClick="Cancel" StartIcon="@Icons.Material.Filled.Cancel">Cancelar</MudButton>
+        <MudButton Class="btn-vita" Variant="Variant.Filled" OnClick="Save" StartIcon="@Icons.Material.Filled.Save">Guardar</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] private IMudDialogInstance MudDialog { get; set; } = default!;
+    [Parameter] public CabañaResponseDto? CabañaSeleccionada { get; set; }
+
+    private AddObjetivoDto _dto = new();
+
+    protected override void OnInitialized()
+    {
+        _dto.Tipo = TipoObjetivo.Anual;
+        _dto.IdCabaña = CabañaSeleccionada?.Id;
+        _dto.Año = DateTime.Now.Year;
+        _dto.MetaOcupacion = 60m;
+        _dto.IsActive = true;
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+
+    private async Task Save()
+    {
+        try
+        {
+            if (_dto.IdCabaña is null or <= 0)
+            {
+                Snackbar.Add("Cabaña inválida.", Severity.Warning);
+                return;
+            }
+
+            var resp = await RequestService.PostAsync("api/objetivos", _dto);
+            if (resp.IsSuccessStatusCode)
+                MudDialog.Close(DialogResult.Ok(true));
+            else
+                Snackbar.Add(await resp.Content.ReadAsStringAsync(), Severity.Error);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error al crear objetivo: {ex.Message}", Severity.Error);
+        }
+    }
+}

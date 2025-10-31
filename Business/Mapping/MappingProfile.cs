@@ -17,7 +17,9 @@ namespace Business.Mapping
             CreateMap<User, UserResponseDto>();
             CreateMap<Objetivo, ObjetivoResponseDto>()
                 .ForMember(dest => dest.NombreCabaña,
-                           opt => opt.MapFrom(src => src.Cabaña != null ? src.Cabaña.Nombre : null));
+                           opt => opt.MapFrom(src => src.Cabaña != null ? src.Cabaña.Nombre : null))
+                .ForMember(dest => dest.IdCabaña,
+                           opt => opt.MapFrom(src => src.IdCabaña));
             CreateMap<AddObjetivoDto, Objetivo>();
             CreateMap<UpdateObjetivoDto, Objetivo>();
             CreateMap<Cabaña, CabañaResponseDto>();

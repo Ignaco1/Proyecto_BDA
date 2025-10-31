@@ -1,0 +1,99 @@
+﻿@page "/objetivosAnualesList"
+@using Web.Pages.Objetivos.Operaciones
+
+@inject IRequestService RequestService
+@inject ISnackbar Snackbar
+@inject NavigationManager Nav
+@inject IDialogService DialogService
+
+<PageTitle>Objetivos Anuales — Lista</PageTitle>
+
+<MudStack Class="mb-3" Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+    <MudText Typo="Typo.h5" Class="text-vita-dark fw-bold">
+        Objetivos Anuales por Cabaña
+    </MudText>
+
+    <MudButton Class="btn-vita"
+               Variant="Variant.Outlined"
+               StartIcon="@Icons.Material.Filled.ArrowBack"
+               OnClick="@(() => Nav.NavigateTo("/objetivosAnuales"))">
+        Volver a Cabañas
+    </MudButton>
+</MudStack>
+
+@if (_items is null)
+{
+    <div class="d-flex justify-center align-center" style="height:60vh;"><Loading /></div>
+}
+else
+{
+    <MudTable Items="_ordenados" Hover="true" Dense="true">
+        <HeaderContent>
+            <MudTh>Cabaña</MudTh>
+            <MudTh>Año</MudTh>
+            <MudTh>Meta %</MudTh>
+            <MudTh>Creado</MudTh>
+            <MudTh>Estado</MudTh>
+            <MudTh></MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd>@context.NombreCabaña</MudTd>
+            <MudTd>@context.Año</MudTd>
+            <MudTd>@($"{context.MetaOcupacion}%")</MudTd>
+            <MudTd>@context.FechaCreacion.ToString("dd/MM/yyyy")</MudTd>
+            <MudTd>
+                @if (context.IsActive)
+                {
+                    <MudChip T="string" Color="Color.Success" Variant="Variant.Filled" Label="true">Activo</MudChip>
+                }
+                else
+                {
+                    <MudChip T="string" Color="Color.Success" Variant="Variant.Filled" Label="true">Activo</MudChip>
+                }
+            </MudTd>
+            <MudTd>
+                <MudIconButton Icon="@Icons.Material.Filled.Edit"
+                               Color="Color.Default"
+                               Style="color:#4a4a4a"
+                               OnClick="@(() => Edit(context))"
+                               Size="Size.Small" />
+            </MudTd>
+        </RowTemplate>
+        <PagerContent><MudTablePager /></PagerContent>
+    </MudTable>
+}
+
+@code {
+    private List<ObjetivoResponseDto>? _items;
+    private IEnumerable<ObjetivoResponseDto>? _ordenados;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var todos = await RequestService.GetAsync<List<ObjetivoResponseDto>>("api/objetivos");
+            _items = todos?.Where(o => o.Tipo == TipoObjetivo.Anual).ToList();
+            _ordenados = _items?.OrderBy(o => o.NombreCabaña).ThenByDescending(o => o.Año);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error al cargar objetivos: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private async Task Edit(ObjetivoResponseDto objetivo)
+    {
+        var parameters = new DialogParameters { ["Objetivo"] = objetivo };
+        var options = new DialogOptions { CloseButton = true, FullWidth = true, MaxWidth = MaxWidth.ExtraSmall };
+
+        var dialog = await DialogService.ShowAsync<EditObjetivoAnualCabaña>("Editar objetivo", parameters, options);
+        var result = await dialog.Result;
+
+        if (result is { Canceled: false })
+        {
+            await OnInitializedAsync();
+            Snackbar.Add("Objetivo actualizado correctamente.", Severity.Success);
+        }
+    }
+}
+
