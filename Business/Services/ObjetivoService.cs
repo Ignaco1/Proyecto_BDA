@@ -2,7 +2,7 @@
 using Application.Services;
 using AutoMapper;
 using Business.Interfaces;
-using Domain.DTOs.Requests;
+using Domain.DTOs.Requests.Objetivo;
 using Domain.DTOs.Responses;
 using Domain.Entities;
 using Domain.Enums;
@@ -255,19 +255,29 @@ namespace Business.Services
         {
             var anuales = await _objetivoRepository.QueryAsync(
                 o => o.Tipo == TipoObjetivo.Anual && o.IdCabaña == idCabaña);
-            var añosAnuales = anuales.Select(o => o.Año).Distinct();
+
+            // Convierte a int (descarta nulos si los hubiera)
+            var añosAnuales = anuales
+                .Where(o => o.Año.HasValue)
+                .Select(o => o.Año.Value)
+                .Distinct();
 
             var añosReservas = _reservaRepository != null
-                ? await _reservaRepository.GetAniosPorCabañaAsync(idCabaña)
+                ? await _reservaRepository.GetAñosPorCabañaAsync(idCabaña)
                 : new List<int>();
 
-            var union = añosAnuales.Union(añosReservas).Distinct().OrderByDescending(x => x).ToList();
+            var union = añosAnuales
+                .Union(añosReservas)
+                .Distinct()
+                .OrderByDescending(x => x)
+                .ToList();
 
             if (!union.Any())
                 union = new List<int> { DateTime.Now.Year };
 
             return union;
         }
+
 
         public async Task<List<ObjetivoResponseDto>> GetObjetivosMensualesPorCabañaYAñoAsync(int idCabaña, int año)
         {

@@ -16,6 +16,6 @@ namespace Domain.Entities
 
         [ForeignKey("ReservaId")]
         public virtual Reserva Reserva { get; set; } = null!;
-        public MotivosCancelacion MotivosCancelacion { get; set; }
+        public MotivosCancelacion MotivosCancelacion { get; set; } = MotivosCancelacion.ErrorSistema;
     }
 }

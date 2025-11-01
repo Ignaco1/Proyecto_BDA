@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Domain.DTOs.Requests
+namespace Domain.DTOs.Requests.Objetivo
 {
     public class UpdateObjetivoDto
     {

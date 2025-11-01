@@ -36,20 +36,26 @@ namespace Infraestructure.Data
                 entity.Property(e => e.Descripcion).IsRequired().HasMaxLength(200);
             });
 
-            modelBuilder.Entity<Reserva>(entity =>
+            modelBuilder.Entity<Reserva>(e =>
             {
-                entity.HasKey(e => e.Id);
-                entity.Property(e => e.FechaEntrada).IsRequired();
-                entity.Property(e => e.FechaSalida).IsRequired();
-                entity.Property(e => e.Total).HasColumnType("decimal(18,2)");
-                entity.HasOne(e => e.Cliente)
-                      .WithMany()
-                      .HasForeignKey(e => e.IdCliente)
-                      .OnDelete(DeleteBehavior.Restrict);
-                entity.HasOne(e => e.Cabaña)
-                      .WithMany()
-                      .HasForeignKey(e => e.IdCabaña)
-                      .OnDelete(DeleteBehavior.Restrict);
+                e.Property(r => r.Total).HasColumnType("decimal(10,2)");
+
+                e.HasOne(r => r.Cabaña)
+                    .WithMany()
+                    .HasForeignKey(r => r.IdCabaña)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                e.HasOne(r => r.Cliente)
+                    .WithMany()
+                    .HasForeignKey(r => r.IdCliente)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                e.HasOne(r => r.Cancelacion)
+                    .WithOne(c => c.Reserva)
+                    .HasForeignKey<Cancelacion>(c => c.ReservaId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                e.HasIndex(r => new { r.IdCabaña, r.FechaEntrada, r.FechaSalida });
             });
 
             modelBuilder.Entity<Cliente>(entity =>
@@ -79,14 +85,12 @@ namespace Infraestructure.Data
             });
 
 
-
             modelBuilder.Entity<Cancelacion>(e =>
             {
-                e.HasIndex(x => new { x.ReservaId, x.Fecha });
-                e.HasOne(x => x.Reserva)
-                 .WithOne(r => r.Cancelacion)
-                 .HasForeignKey<Cancelacion>(x => x.ReservaId)
-                 .OnDelete(DeleteBehavior.Cascade);
+                e.HasOne(c => c.Reserva)
+                    .WithOne(r => r.Cancelacion)
+                    .HasForeignKey<Cancelacion>(c => c.ReservaId)
+                    .OnDelete(DeleteBehavior.Cascade);
             });
         }
 

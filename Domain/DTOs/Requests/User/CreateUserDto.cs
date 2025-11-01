@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Domain.DTOs.Requests
+namespace Domain.DTOs.Requests.User
 {
     public class CreateUserDto
     {

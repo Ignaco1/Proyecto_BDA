@@ -1,6 +1,6 @@
 ﻿using Business.Interfaces;
 using Business.Services;
-using Domain.DTOs.Requests;
+using Domain.DTOs.Requests.Objetivo;
 using Domain.DTOs.Responses;
 using Domain.Enums;
 using Microsoft.AspNetCore.Authorization;

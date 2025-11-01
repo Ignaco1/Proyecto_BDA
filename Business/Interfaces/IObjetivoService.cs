@@ -1,4 +1,4 @@
-﻿using Domain.DTOs.Requests;
+﻿using Domain.DTOs.Requests.Objetivo;
 using Domain.DTOs.Responses;
 using Domain.Entities;
 using System;

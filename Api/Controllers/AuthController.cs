@@ -1,5 +1,5 @@
-﻿    using Business.Interfaces;
-using Domain.DTOs.Requests;
+﻿using Business.Interfaces;
+using Domain.DTOs.Requests.User;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
