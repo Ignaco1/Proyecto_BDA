@@ -10,5 +10,6 @@ namespace Domain.Intefaces
     public interface ICabañaRepository
     {
         Task<List<Cabaña>> GetAllAsync();
+        Task<string?> GetNombreByIdAsync(int id);
     }
 }

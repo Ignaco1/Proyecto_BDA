@@ -1,5 +1,7 @@
 ﻿using Business.Interfaces;
+using Business.Services;
 using Domain.DTOs.Requests;
+using Domain.DTOs.Responses;
 using Domain.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -119,6 +121,53 @@ namespace Api.Controllers
             {
                 return BadRequest(ex.Message );
             }
+        }
+
+        [HttpGet("mensuales")]
+        public async Task<ActionResult<List<ObjetivoResponseDto>>> GetMensuales()
+        {
+            var data = await _IObjetivoService.GetObjetivosMensualesAsync();
+            return Ok(data);
+        }
+
+        [HttpPost("mensuales")]
+        public async Task<ActionResult<ObjetivoResponseDto>> CreateMensual([FromBody] AddObjetivoDto dto)
+        {
+            try
+            {
+                var creado = await _IObjetivoService.CreateObjetivoMensualAsync(dto);
+                return CreatedAtAction(nameof(GetById), new { id = creado.Id }, creado);
+            }
+            catch (ArgumentException ex) { return BadRequest(ex.Message); }
+            catch (InvalidOperationException ex) { return Conflict(ex.Message); }
+        }
+
+        [HttpPut("mensuales")]
+        public async Task<IActionResult> UpdateMensual([FromBody] UpdateObjetivoDto dto)
+        {
+            try
+            {
+                await _IObjetivoService.UpdateObjetivoMensualAsync(dto);
+                return NoContent();
+            }
+            catch (KeyNotFoundException) { return NotFound(); }
+            catch (ArgumentException ex) { return BadRequest(ex.Message); }
+            catch (InvalidOperationException ex) { return Conflict(ex.Message); }
+        }
+
+        [HttpGet("mensuales/cabana/{idCabaña:int}/years")]
+        public async Task<ActionResult<List<int>>> GetAñosMensuales(int idCabaña)
+        {
+            var años = await _IObjetivoService.GetAñosDisponiblesMensualAsync(idCabaña);
+            return Ok(años);
+        }
+
+
+        [HttpGet("mensuales/cabana/{idCabaña:int}/{año:int}")]
+        public async Task<ActionResult<List<ObjetivoResponseDto>>> GetMensualesPorCabanaYAño(int idCabaña, int año)
+        {
+            var lista = await _IObjetivoService.GetObjetivosMensualesPorCabañaYAñoAsync(idCabaña, año);
+            return Ok(lista);
         }
 
     }

@@ -11,7 +11,7 @@ namespace Domain.DTOs.Requests
 {
     public class AddObjetivoDto
     {
-        public int Año { get; set; }
+        public int? Año { get; set; }
         public int? Mes { get; set; }
 
         [Range(0, 100)]

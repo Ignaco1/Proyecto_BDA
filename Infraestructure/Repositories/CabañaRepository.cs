@@ -18,5 +18,11 @@ namespace Infraestructure.Repositories
         {
             return await _context.Cabañas.ToListAsync();
         }
+
+        public async Task<string?> GetNombreByIdAsync(int id)
+            => await _context.Cabañas
+                             .Where(c => c.Id == id)
+                             .Select(c => c.Nombre)
+                             .FirstOrDefaultAsync();
     }
 }

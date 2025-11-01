@@ -8,17 +8,17 @@ namespace Domain.DTOs.Requests
     {
         [Required]
         public int Id { get; set; }
-        public int Año { get; set; }
+        public int? Año { get; set; }
         public int? Mes { get; set; }
 
         [Range(0, 100)]
         [Column(TypeName = "decimal(5,2)")]
-        public decimal MetaOcupacion { get; set; }
+        public decimal? MetaOcupacion { get; set; }
 
         public TipoObjetivo Tipo { get; set; } = TipoObjetivo.General; 
         public int? IdCabaña { get; set; }                              
 
         public DateTime FechaCreacion { get; set; } = DateTime.Now;
-        public bool IsActive { get; set; } = true;
+        public bool? IsActive { get; set; } = true;
     }
 }

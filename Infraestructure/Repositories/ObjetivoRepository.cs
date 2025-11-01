@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -21,6 +22,11 @@ namespace Infraestructure.Repositories
             return objetivo;
         }
 
+        public async Task<bool> ExistsAsync(Expression<Func<Objetivo, bool>> predicate)
+        {
+            return await _context.Objetivos.AnyAsync(predicate);
+        }
+
         public async Task<List<Objetivo>> GetAllAsync()
         {
             return await _context.Objetivos
@@ -33,6 +39,15 @@ namespace Infraestructure.Repositories
             return await _context.Objetivos
                 .Include(o => o.Cabaña)
                 .FirstOrDefaultAsync(o => o.Id == id);  
+        }
+
+        public async Task<List<Objetivo>> QueryAsync(Expression<Func<Objetivo, bool>> predicate, bool includeCabaña = true)
+        {
+            var query = _context.Objetivos.AsQueryable();
+            if (includeCabaña)
+                query = query.Include(o => o.Cabaña);
+
+            return await query.Where(predicate).ToListAsync();
         }
 
         public async Task UpdateAsync(Objetivo objetivo)
