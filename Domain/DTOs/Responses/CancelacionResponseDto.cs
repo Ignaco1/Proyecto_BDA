@@ -21,8 +21,8 @@ namespace Domain.DTOs.Responses
         public int IdCliente { get; set; }
         public string? NombreCliente { get; set; }
 
-        public DateTime FechaIngreso { get; set; }
-        public DateTime FechaEgreso { get; set; }
+        public DateTime FechaEntrada { get; set; }
+        public DateTime FechaSalida { get; set; }
         public decimal Total { get; set; }
     }
 }

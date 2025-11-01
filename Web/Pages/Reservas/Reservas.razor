@@ -17,7 +17,6 @@
 
 <MudStack Class="mb-4" Row="true" Spacing="2" AlignItems="AlignItems.Center">
 
-    <!-- 🔹 Filtro por cabaña -->
     <MudSelect T="int?" Label="Cabaña" @bind-Value="_filtroCabañaId" Dense="true" Style="min-width:220px;" DisableUnderline="true">
         <MudSelectItem T="int?" Value="null">Todas</MudSelectItem>
         @if (_cabañas != null)
@@ -29,7 +28,6 @@
         }
     </MudSelect>
 
-    <!-- 🔹 Filtro por estado -->
     <MudSelect T="EstadosReserva?" Label="Estado" @bind-Value="_filtroEstado" Dense="true" Style="min-width:220px;" DisableUnderline="true">
         <MudSelectItem T="EstadosReserva?" Value="null">Todos</MudSelectItem>
         <MudSelectItem T="EstadosReserva?" Value="EstadosReserva.Pendiente">Pendiente</MudSelectItem>
@@ -37,10 +35,14 @@
         <MudSelectItem T="EstadosReserva?" Value="EstadosReserva.Finalizada">Finalizada</MudSelectItem>
     </MudSelect>
 
-    <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="FiltrarReservas">
-        <MudIcon Icon="@Icons.Material.Filled.Search" />
+    <MudButton Class="btn-vita-primary" OnClick="FiltrarReservas" StartIcon="@Icons.Material.Filled.Search">
         Filtrar
     </MudButton>
+
+    <MudButton Class="btn-vita-outline" OnClick="RestablecerFiltros" StartIcon="@Icons.Material.Filled.Refresh">
+        Restablecer
+    </MudButton>
+
 </MudStack>
 
 @if (_reservas is null)
@@ -131,7 +133,13 @@ else
             EstadosReserva.Pendiente  => (Color.Warning,  "Pendiente"),
             EstadosReserva.Activa     => (Color.Info,     "Activa"),
             EstadosReserva.Finalizada => (Color.Success,  "Finalizada"),
-            EstadosReserva.Cancelada  => (Color.Error,    "Cancelada"),
             _                         => (Color.Default,  "—")
         };
+
+    private async Task RestablecerFiltros()
+    {
+        _filtroCabañaId = null;
+        _filtroEstado = null;
+        await FiltrarReservas();
+    }
 }

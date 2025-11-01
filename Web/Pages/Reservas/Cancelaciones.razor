@@ -1,0 +1,81 @@
+﻿@page "/cancelaciones"
+@using System.Globalization
+@using Domain.Enums
+@inject IRequestService RequestService
+@inject ISnackbar Snackbar
+
+<PageTitle>Cancelaciones</PageTitle>
+
+<MudStack Class="mb-3" Row="true" Justify="Justify.FlexStart">
+    <MudText Typo="Typo.h5" Class="text-vita-dark fw-bold">
+        Reservas canceladas
+    </MudText>
+</MudStack>
+
+@if (_items is null)
+{
+    <div class="d-flex justify-center align-center" style="height: 60vh;">
+        <Loading />
+    </div>
+}
+else if (_items.Count == 0)
+{
+    <MudAlert Severity="Severity.Info" Variant="Variant.Outlined">
+        No hay cancelaciones registradas.
+    </MudAlert>
+}
+else
+{
+    <MudTable Items="_items" Hover="true" Elevation="2" Dense="true">
+        <HeaderContent>
+            <MudTh>Cabaña</MudTh>
+            <MudTh>Cliente</MudTh>
+            <MudTh>Entrada</MudTh>
+            <MudTh>Salida</MudTh>
+            <MudTh>Total</MudTh>
+            <MudTh>Motivo de Cancelación</MudTh>
+            <MudTh>Estado</MudTh>
+        </HeaderContent>
+
+        <RowTemplate>
+            <MudTd>@context.NombreCabaña</MudTd>
+            <MudTd>@context.NombreCliente</MudTd>
+            <MudTd DataLabel="Entrada">@context.FechaEntrada.ToString("dd/MM/yyyy")</MudTd>
+            <MudTd DataLabel="Salida">@context.FechaSalida.ToString("dd/MM/yyyy")</MudTd>
+
+            <MudTd DataLabel="Total" Style="text-align:right;">
+                @context.Total.ToString("C", new CultureInfo("es-AR"))
+            </MudTd>
+
+            <MudTd DataLabel="Motivo de Cancelación">
+                <MudChip T="string" Color="Color.Info" Variant="Variant.Filled" Label="true">
+                    @context.MotivosCancelacion.ToString()
+                </MudChip>
+            </MudTd>
+
+            <MudTd DataLabel="Estado">
+                <MudChip T="string" Color="Color.Error" Variant="Variant.Filled" Label="true">
+                    Cancelada
+                </MudChip>
+            </MudTd>
+        </RowTemplate>
+    </MudTable>
+}
+
+@code {
+    private List<CancelacionResponseDto>? _items;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            _items = await RequestService.GetAsync<List<CancelacionResponseDto>>("api/cancelaciones");
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error al cargar cancelaciones: {ex.Message}", Severity.Error);
+            _items = new();
+        }
+    }
+
+}

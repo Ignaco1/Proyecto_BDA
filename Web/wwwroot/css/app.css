@@ -197,5 +197,18 @@ code {
     transition: all 0.2s ease-in-out;
 }
 
+.btn-vita-primary {
+    background-color: #0056AC !important;
+    color: white !important;
+    font-weight: 600;
+}
+
+.btn-vita-outline {
+    border: 2px solid #0056AC !important;
+    color: #0056AC !important;
+    font-weight: 600;
+}
+
+
 
 

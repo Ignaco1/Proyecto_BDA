@@ -35,6 +35,9 @@ namespace Infraestructure.Repositories
         {
             return await _context.Cancelaciones
                 .Include(c => c.Reserva)
+                    .ThenInclude(r => r.Cabaña)
+                .Include(c => c.Reserva)
+                    .ThenInclude(r => r.Cliente)
                 .FirstOrDefaultAsync(c => c.ReservaId == reservaId);
         }
     }

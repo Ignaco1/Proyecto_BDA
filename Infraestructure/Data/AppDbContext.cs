@@ -41,19 +41,19 @@ namespace Infraestructure.Data
                 e.Property(r => r.Total).HasColumnType("decimal(10,2)");
 
                 e.HasOne(r => r.Cabaña)
-                    .WithMany()
-                    .HasForeignKey(r => r.IdCabaña)
-                    .OnDelete(DeleteBehavior.Restrict);
+                 .WithMany()
+                 .HasForeignKey(r => r.IdCabaña)
+                 .OnDelete(DeleteBehavior.Restrict);
 
                 e.HasOne(r => r.Cliente)
-                    .WithMany()
-                    .HasForeignKey(r => r.IdCliente)
-                    .OnDelete(DeleteBehavior.Restrict);
+                 .WithMany()
+                 .HasForeignKey(r => r.IdCliente)
+                 .OnDelete(DeleteBehavior.Restrict);
 
                 e.HasOne(r => r.Cancelacion)
-                    .WithOne(c => c.Reserva)
-                    .HasForeignKey<Cancelacion>(c => c.ReservaId)
-                    .OnDelete(DeleteBehavior.Cascade);
+                 .WithOne(c => c.Reserva)
+                 .HasForeignKey<Cancelacion>(c => c.ReservaId)
+                 .OnDelete(DeleteBehavior.Cascade);
 
                 e.HasIndex(r => new { r.IdCabaña, r.FechaEntrada, r.FechaSalida });
             });
@@ -84,13 +84,9 @@ namespace Infraestructure.Data
                  .HasFilter("[Tipo] = 2 AND [IsActive] = 1"); 
             });
 
-
             modelBuilder.Entity<Cancelacion>(e =>
             {
-                e.HasOne(c => c.Reserva)
-                    .WithOne(r => r.Cancelacion)
-                    .HasForeignKey<Cancelacion>(c => c.ReservaId)
-                    .OnDelete(DeleteBehavior.Cascade);
+                e.HasIndex(c => c.ReservaId).IsUnique();
             });
         }
 
