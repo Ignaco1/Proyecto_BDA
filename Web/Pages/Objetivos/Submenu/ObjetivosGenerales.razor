@@ -36,7 +36,6 @@ else
 {
     <MudTable Items="@_objetivosOrdenados" Hover="true" SortLabel="Ordenar por">
         <HeaderContent>
-            <MudTh><MudTableSortLabel SortBy="new Func<ObjetivoResponseDto, object>(x => x.Id)">Id</MudTableSortLabel></MudTh>
             <MudTh><MudTableSortLabel SortBy="new Func<ObjetivoResponseDto, object>(x => x.Año)">Año</MudTableSortLabel></MudTh>
             <MudTh><MudTableSortLabel SortBy="new Func<ObjetivoResponseDto, object>(x => x.MetaOcupacion)">Meta Ocupación</MudTableSortLabel></MudTh>
             <MudTh><MudTableSortLabel SortBy="new Func<ObjetivoResponseDto, object>(x => x.FechaCreacion)">Fecha Creación</MudTableSortLabel></MudTh>
@@ -45,7 +44,6 @@ else
         </HeaderContent>
 
         <RowTemplate>
-            <MudTd DataLabel="Id">@context.Id</MudTd>
             <MudTd DataLabel="Año">@context.Año</MudTd>
             <MudTd DataLabel="Meta Ocupación">@($"{context.MetaOcupacion}%")</MudTd>
             <MudTd DataLabel="Fecha Creación">@context.FechaCreacion.ToString("dd/MM/yyyy")</MudTd>

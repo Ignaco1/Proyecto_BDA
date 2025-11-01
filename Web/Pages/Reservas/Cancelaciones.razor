@@ -12,13 +12,50 @@
     </MudText>
 </MudStack>
 
-@if (_items is null)
+<MudStack Class="mb-4" Row="true" Spacing="2" AlignItems="AlignItems.Center">
+
+    <MudSelect T="int?" Label="Cabaña" @bind-Value="_filtroCabañaId" Dense="true"
+               Style="min-width:220px;" DisableUnderline="true">
+        <MudSelectItem T="int?" Value="null">Todas</MudSelectItem>
+        @if (_cabañas != null)
+        {
+            @foreach (var cab in _cabañas)
+            {
+                <MudSelectItem T="int?" Value="@cab.Id">@cab.Nombre</MudSelectItem>
+            }
+        }
+    </MudSelect>
+
+    <MudSelect T="MotivosCancelacion?" Label="Motivo" @bind-Value="_filtroMotivo"
+               Dense="true" Style="min-width:260px;" DisableUnderline="true">
+        <!-- el "Todos" debe ser null del mismo tipo -->
+        <MudSelectItem T="MotivosCancelacion?" Value="@((MotivosCancelacion?)null)">Todos</MudSelectItem>
+
+        @foreach (var m in _motivos)
+        {
+            <!-- acá va el enum, no el string "m" -->
+            <MudSelectItem T="MotivosCancelacion?" Value="@m">@m.ToString()</MudSelectItem>
+        }
+    </MudSelect>
+
+    <MudButton Class="btn-vita-primary" OnClick="FiltrarCancelaciones" StartIcon="@Icons.Material.Filled.Search">
+        Filtrar
+    </MudButton>
+
+    <MudButton Class="btn-vita-outline" OnClick="RestablecerFiltros" StartIcon="@Icons.Material.Filled.Refresh">
+        Restablecer
+    </MudButton>
+
+</MudStack>
+
+
+@if (_cancelaciones is null)
 {
     <div class="d-flex justify-center align-center" style="height: 60vh;">
         <Loading />
     </div>
 }
-else if (_items.Count == 0)
+else if (!_cancelaciones.Any())
 {
     <MudAlert Severity="Severity.Info" Variant="Variant.Outlined">
         No hay cancelaciones registradas.
@@ -26,7 +63,7 @@ else if (_items.Count == 0)
 }
 else
 {
-    <MudTable Items="_items" Hover="true" Elevation="2" Dense="true">
+    <MudTable Items="_cancelaciones" Hover="true" Elevation="2" Dense="true">
         <HeaderContent>
             <MudTh>Cabaña</MudTh>
             <MudTh>Cliente</MudTh>
@@ -63,19 +100,57 @@ else
 }
 
 @code {
-    private List<CancelacionResponseDto>? _items;
+    // Datos
+    private List<CancelacionResponseDto>? _todasCancelaciones;
+    private List<CancelacionResponseDto>? _cancelaciones;
+    private List<CabañaResponseDto>? _cabañas;
+
+    // Filtros
+    private int? _filtroCabañaId;
+    private MotivosCancelacion? _filtroMotivo = null;
+    private readonly MotivosCancelacion[] _motivos = Enum.GetValues<MotivosCancelacion>();
 
     protected override async Task OnInitializedAsync()
     {
+        await CargarDatosAsync();
+    }
+
+    private async Task CargarDatosAsync()
+    {
         try
         {
-            _items = await RequestService.GetAsync<List<CancelacionResponseDto>>("api/cancelaciones");
+            _cabañas = await RequestService.GetAsync<List<CabañaResponseDto>>("api/cabañas");
+            _todasCancelaciones = await RequestService.GetAsync<List<CancelacionResponseDto>>("api/cancelaciones");
+            _cancelaciones = _todasCancelaciones?.ToList();
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"Error al cargar cancelaciones: {ex.Message}", Severity.Error);
-            _items = new();
+            Snackbar.Add($"Error al cargar los datos: {ex.Message}", Severity.Error);
         }
+    }
+
+    private void FiltrarCancelaciones()
+    {
+        if (_todasCancelaciones is null) return;
+
+        IEnumerable<CancelacionResponseDto> q = _todasCancelaciones;
+
+        if (_filtroCabañaId.HasValue)
+            q = q.Where(x => x.IdCabaña == _filtroCabañaId.Value);
+
+        if (_filtroMotivo.HasValue)
+            q = q.Where(x => x.MotivosCancelacion == _filtroMotivo.Value);
+
+        _cancelaciones = q.ToList();
+        StateHasChanged();
+    }
+
+    private void RestablecerFiltros()
+    {
+        _filtroCabañaId = null;
+        _filtroMotivo = null;
+        _cancelaciones = _todasCancelaciones?.ToList();
+        StateHasChanged();
     }
 
 }
