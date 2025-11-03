@@ -155,7 +155,7 @@ namespace Api.Controllers
             catch (InvalidOperationException ex) { return Conflict(ex.Message); }
         }
 
-        [HttpGet("mensuales/cabana/{idCabaña:int}/years")]
+        [HttpGet("mensuales/cabaña/{idCabaña:int}/years")]
         public async Task<ActionResult<List<int>>> GetAñosMensuales(int idCabaña)
         {
             var años = await _IObjetivoService.GetAñosDisponiblesMensualAsync(idCabaña);
@@ -163,7 +163,7 @@ namespace Api.Controllers
         }
 
 
-        [HttpGet("mensuales/cabana/{idCabaña:int}/{año:int}")]
+        [HttpGet("mensuales/cabaña/{idCabaña:int}/{año:int}")]
         public async Task<ActionResult<List<ObjetivoResponseDto>>> GetMensualesPorCabanaYAño(int idCabaña, int año)
         {
             var lista = await _IObjetivoService.GetObjetivosMensualesPorCabañaYAñoAsync(idCabaña, año);

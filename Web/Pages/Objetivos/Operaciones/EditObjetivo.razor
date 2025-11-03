@@ -18,46 +18,23 @@
             <MudGrid Spacing="3">
                 <MudItem xs="12" md="6">
                     <MudTextField @bind-Value="_updateObjetivoDto.Año"
-                                  Class="vita-adorn"
                                   Label="Año"
                                   Variant="Variant.Outlined"
                                   Type="number"
                                   Required="true"
                                   RequiredError="El año es requerido"
-                                  HelperText="Ejemplo: 2025"
-                                  Adornment="Adornment.Start"
-                                  AdornmentIcon="@Icons.Material.Filled.CalendarMonth"
-                                  AdornmentColor="Color.Default" />
+                                  HelperText="Ej: 2025" />
                 </MudItem>
-
-                @if (!EsGeneral)
-                {
-                    <MudItem xs="12" md="6">
-                        <MudTextField @bind-Value="_updateObjetivoDto.Mes"
-                                      Class="vita-adorn"
-                                      Label="Mes"
-                                      Variant="Variant.Outlined"
-                                      Type="number"
-                                      HelperText="Ingrese el número de mes (1-12)"
-                                      Adornment="Adornment.Start"
-                                      AdornmentIcon="@Icons.Material.Filled.DateRange"
-                                      AdornmentColor="Color.Default" />
-                    </MudItem>
-                }
 
                 <MudItem xs="12">
                     <MudTextField @bind-Value="_updateObjetivoDto.MetaOcupacion"
-                                  Class="vita-adorn"
                                   Label="Meta de Ocupación (%)"
                                   Variant="Variant.Outlined"
                                   Type="number"
                                   Min="0" Max="100" Step="0.5"
                                   Required="true"
                                   RequiredError="La meta de ocupación es requerida"
-                                  HelperText="Ingrese un valor entre 0 y 100"
-                                  Adornment="Adornment.Start"
-                                  AdornmentIcon="@Icons.Material.Filled.BarChart"
-                                  AdornmentColor="Color.Default" />
+                                  HelperText="Ingrese un valor entre 0 y 100" />
                 </MudItem>
 
                 <MudItem xs="12">

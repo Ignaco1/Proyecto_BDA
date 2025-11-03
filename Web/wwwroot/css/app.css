@@ -1,7 +1,6 @@
 /* =========================================================
    VITA STAYS — ESTILOS GENERALES
    ========================================================= */
-
 /* Tipografía global */
 html, body, .mud-typography, .mud-button, .mud-input, .mud-table, .mud-appbar, .mud-nav-link {
     font-family: "Century Gothic", "Segoe UI", "Inter", sans-serif !important;
@@ -9,8 +8,8 @@ html, body, .mud-typography, .mud-button, .mud-input, .mud-table, .mud-appbar, .
 
 /* Colores base */
 :root {
-    --vita-blue-dark: #002851; /* Azul oscuro principal */
-    --vita-blue-light: #0072E3; /* Celeste corporativo */
+    --vita-blue-dark: #002851;
+    --vita-blue-light: #0072E3;
     --vita-gray: #414141;
     --vita-white: #ffffff;
 }
@@ -18,7 +17,6 @@ html, body, .mud-typography, .mud-button, .mud-input, .mud-table, .mud-appbar, .
 /* =========================================================
    APPBAR (BARRA SUPERIOR)
    ========================================================= */
-
 .appbar-vita {
     background: var(--vita-blue-light) !important;
 }
@@ -27,7 +25,6 @@ html, body, .mud-typography, .mud-button, .mud-input, .mud-table, .mud-appbar, .
     color: var(--vita-white) !important;
 }
 
-/* Botones del AppBar (perfil/salir/login/register) */
 .btn-appbar {
     color: var(--vita-white) !important;
     border-color: rgba(255,255,255,0.7) !important;
@@ -37,12 +34,10 @@ html, body, .mud-typography, .mud-button, .mud-input, .mud-table, .mud-appbar, .
 /* =========================================================
    DRAWER (MENÚ LATERAL)
    ========================================================= */
-
 .drawer-vita {
     background-color: var(--vita-blue-light) !important;
 }
 
-    /* Texto e íconos blancos */
     .drawer-vita .text-drawer,
     .drawer-vita .mud-drawer-header .text-drawer,
     .drawer-vita .mud-icon,
@@ -50,7 +45,6 @@ html, body, .mud-typography, .mud-button, .mud-input, .mud-table, .mud-appbar, .
         color: var(--vita-white) !important;
     }
 
-/* Links del menú lateral */
 .navlink-vita {
     color: var(--vita-white) !important;
 }
@@ -60,16 +54,13 @@ html, body, .mud-typography, .mud-button, .mud-input, .mud-table, .mud-appbar, .
         border-radius: 8px;
     }
 
-/* Hover para íconos del menú */
 .drawer-vita .mud-nav-link:hover .mud-icon {
-    color: #e0e0e0 !important; /* gris claro al pasar el mouse */
+    color: #e0e0e0 !important;
 }
 
 /* =========================================================
    BOTONES
    ========================================================= */
-
-/* Botones principales (Login/Register/Nuevo Objetivo) */
 .btn-vita {
     background-color: var(--vita-blue-dark) !important;
     border-color: var(--vita-blue-dark) !important;
@@ -84,7 +75,6 @@ html, body, .mud-typography, .mud-button, .mud-input, .mud-table, .mud-appbar, .
 /* =========================================================
    FORMULARIOS E INPUTS
    ========================================================= */
-
 .mud-input-root.mud-input-underline:after {
     border-bottom-color: var(--vita-blue-light) !important;
 }
@@ -93,7 +83,6 @@ html, body, .mud-typography, .mud-button, .mud-input, .mud-table, .mud-appbar, .
     color: var(--vita-gray);
 }
 
-/* Links secundarios ("Recupérala aquí", etc.) */
 .link-vita,
 .link-vita:visited,
 .link-vita:active,
@@ -109,16 +98,13 @@ html, body, .mud-typography, .mud-button, .mud-input, .mud-table, .mud-appbar, .
 /* =========================================================
    LOGIN / REGISTER
    ========================================================= */
-
 .login-paper {
     border: 1px solid #e5e5e5;
 }
 
 /* =========================================================
-   DETALLES DE SISTEMA (OPCIONALES)
+   DETALLES DE SISTEMA
    ========================================================= */
-
-/* Validación de formularios */
 .valid.modified:not([type=checkbox]) {
     outline: 1px solid #26b050;
 }
@@ -131,52 +117,39 @@ html, body, .mud-typography, .mud-button, .mud-input, .mud-table, .mud-appbar, .
     color: red;
 }
 
-/* Indicador de carga */
 .loading-progress circle:last-child {
     stroke: var(--vita-blue-light);
 }
 
-/* Código */
 code {
     color: #c02d76;
 }
 
 /* ===============================================
-   NAVMENU (Drawer) — Íconos y texto en blanco
+   NAVMENU (Drawer) — Íconos y texto
    =============================================== */
-
-/* Texto e íconos blancos por defecto */
 .drawer-vita .mud-nav-link,
 .drawer-vita .mud-nav-link .mud-icon {
     color: #ffffff !important;
-    transition: color 0.25s ease-in-out; /* transición suave */
+    transition: color 0.25s ease-in-out;
 }
 
-    /* Hover gris claro */
     .drawer-vita .mud-nav-link:hover,
     .drawer-vita .mud-nav-link:hover .mud-icon {
         color: #e0e0e0 !important;
     }
 
-/* Link activo (ruta actual) */
 .drawer-vita .mud-nav-link-active {
     background-color: rgba(255, 255, 255, 0.18);
     border-radius: 8px;
     color: #ffffff !important;
 }
 
-    /* Ícono activo: blanco sólido */
     .drawer-vita .mud-nav-link-active .mud-icon {
         color: #ffffff !important;
     }
 
 /* ===== Colores corporativos Vita ===== */
-:root {
-    --vita-dark-blue: #002851;
-    --vita-light-blue: #0072E3;
-}
-
-/* Iconos sueltos (títulos del diálogo, etc.) */
 .icon-vita {
     color: var(--vita-dark-blue) !important;
 }
@@ -185,12 +158,10 @@ code {
         color: var(--vita-light-blue) !important;
     }
 
-/* Forzar color del ícono de Adornment (los íconos dentro de los inputs) */
 .vita-adorn .mud-input-adornment .mud-icon {
     color: var(--vita-dark-blue) !important;
 }
 
-/* Estilo hover para tarjetas del menú de Objetivos */
 .hover-elevate-8:hover {
     transform: translateY(-3px);
     box-shadow: 0 6px 20px rgba(0,0,0,0.15);
@@ -209,6 +180,76 @@ code {
     font-weight: 600;
 }
 
+/* =========================================================
+   TABLAS - SOLUCIÓN COMPLETA
+   ========================================================= */
 
+/* Tabla ocupa 100% del ancho */
+.mud-table {
+    width: 100%;
+    table-layout: auto;
+}
 
+/* Evitar que el texto se corte en múltiples líneas */
+.mud-table-cell {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
 
+/* Columna de Acciones fija a la derecha */
+.col-acciones {
+    width: 180px;
+    min-width: 180px;
+    text-align: right;
+    white-space: nowrap;
+    padding-right: 16px !important;
+}
+
+/* Para tablas con más espacio de acciones */
+.col-acciones-wide {
+    width: 260px;
+    min-width: 260px;
+    text-align: right;
+    white-space: nowrap;
+    padding-right: 16px !important;
+}
+
+/* Asegurar que las celdas de datos no se expandan demasiado */
+.mud-table-cell:not(.col-acciones):not(.col-acciones-wide) {
+    max-width: 200px;
+}
+
+/* Para celdas de descripción más amplias */
+.col-descripcion {
+    max-width: 300px;
+    white-space: normal;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Eliminar borde inferior de la última fila para cerrar bien */
+.mud-table-container {
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+/* Asegurar que la tabla tenga bordes completos */
+.mud-table {
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+/* Responsive: en móviles permitir scroll horizontal */
+@media (max-width: 768px) {
+    .mud-table-container {
+        overflow-x: auto;
+    }
+
+    .col-acciones,
+    .col-acciones-wide {
+        width: auto;
+        min-width: 150px;
+    }
+}

@@ -36,12 +36,13 @@ else
         <MudTh>Precio/Noche</MudTh>
         <MudTh>Descripción</MudTh>
         <MudTh>Estado</MudTh>
-        <MudTh></MudTh>            
+        <MudTh>  </MudTh>
+        <MudTh Class="col-acciones">Acciones</MudTh>          
     </HeaderContent>
     <RowTemplate>
         <MudTd DataLabel="Nombre">@context.Nombre</MudTd>
         <MudTd DataLabel="Capacidad">@context.Capacidad</MudTd>
-        <MudTd DataLabel="Precio/Noche">
+        <MudTd DataLabel="Precio por noche">
             @context.PrecioPorNoche.ToString("C", new System.Globalization.CultureInfo("es-AR"))
         </MudTd>
         <MudTd DataLabel="Descripción">@context.Descripcion</MudTd>
@@ -55,13 +56,17 @@ else
                     <MudChip T="string" Color="Color.Error" Variant="Variant.Outlined" Label="true">Inactivo</MudChip>
             }
         </MudTd>
-        <MudTd>
-            <MudButton Variant="Variant.Outlined"
-                       StartIcon="@Icons.Material.Filled.Add"
-                       OnClick="@(() => OpenAddDialog(context))">
-                Nuevo objetivo
-            </MudButton>
-        </MudTd>
+        <MudTh>  
+
+        </MudTh>
+            <MudTd Class="col-acciones">
+                <MudButton Variant="Variant.Outlined"
+                           StartIcon="@Icons.Material.Filled.Add"
+                           Class="btn-accion"
+                           OnClick="@(() => OpenAddDialog(context))">
+                    Nuevo objetivo
+                </MudButton>
+            </MudTd>
     </RowTemplate>
     <PagerContent><MudTablePager /></PagerContent>
 </MudTable>

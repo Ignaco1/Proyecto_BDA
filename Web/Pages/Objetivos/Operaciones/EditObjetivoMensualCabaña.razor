@@ -1,0 +1,120 @@
+﻿@using Domain.DTOs.Requests.Objetivo
+@using Domain.DTOs.Responses
+@inject IRequestService RequestService
+@inject ISnackbar Snackbar
+
+<MudDialog MaxWidth="MaxWidth.ExtraSmall" FullWidth="true">
+    <TitleContent>
+        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
+            <MudIcon Icon="@Icons.Material.Filled.Edit" Class="icon-vita" />
+            <MudText Typo="Typo.h6">Editar objetivo mensual</MudText>
+        </MudStack>
+        @if (Objetivo is not null)
+        {
+            <MudText Typo="Typo.body2" Class="mt-1">
+                Cabaña: <b>@Objetivo.NombreCabaña</b> · Mes: <b>@MesNombre(Objetivo.Mes ?? 0)</b> · Año: <b>@Objetivo.Año</b>
+            </MudText>
+        }
+        else
+        {
+            <MudText Typo="Typo.body2" Class="mt-1 text-error">No se recibió el objetivo.</MudText>
+        }
+    </TitleContent>
+
+    <DialogContent>
+        <MudGrid Spacing="2">
+            <MudItem xs="12">
+                <MudTextField T="decimal?"
+                                 @bind-Value="_meta"
+                                 Label="Meta de ocupación (%)"
+                                 Variant="Variant.Outlined"
+                                 Immediate="true" Dense="true"
+                                 Type="number"
+                                 Min="0" Max="100" Step="0.5"
+                                 Required="true"
+                                 RequiredError="La meta de ocupación es requerida"
+                                 HelperText="Ingrese un valor entre 0 y 100" />
+            </MudItem>
+        </MudGrid>
+    </DialogContent>
+
+    <DialogActions>
+        <MudButton Variant="Variant.Text" OnClick="Cancel" StartIcon="@Icons.Material.Filled.Cancel">
+            Cancelar
+        </MudButton>
+
+        <MudButton Class="btn-vita"
+                   Variant="Variant.Filled"
+                   StartIcon="@Icons.Material.Filled.Save"
+                   Disabled="@(!_meta.HasValue || _meta < 0 || _meta > 100)"
+                   OnClick="Save">
+            Guardar
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] private IMudDialogInstance MudDialog { get; set; } = default!;
+    [Parameter] public ObjetivoResponseDto Objetivo { get; set; } = default!;
+
+    private decimal? _meta;
+
+    protected override void OnInitialized()
+    {
+        if (Objetivo is null)
+        {
+            _meta = null;
+            return;
+        }
+
+        _meta = Objetivo.MetaOcupacion;
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+
+    private async Task Save()
+    {
+        try
+        {
+            if (Objetivo is null)
+            {
+                Snackbar.Add("No se recibió el objetivo a editar.", Severity.Error);
+                return;
+            }
+
+            if (!_meta.HasValue || _meta < 0 || _meta > 100)
+            {
+                Snackbar.Add("La meta debe estar entre 0 y 100.", Severity.Warning);
+                return;
+            }
+
+            var dto = new UpdateObjetivoDto
+            {
+                Id = Objetivo.Id,
+                MetaOcupacion = _meta.Value
+            };
+
+            var resp = await RequestService.PutAsync("api/objetivos/mensuales", dto);
+            if (resp.IsSuccessStatusCode)
+            {
+                MudDialog.Close(DialogResult.Ok(true));
+            }
+            else
+            {
+                var msg = await resp.Content.ReadAsStringAsync();
+                Snackbar.Add(string.IsNullOrWhiteSpace(msg) ? "No se pudo actualizar el objetivo." : msg, Severity.Error);
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error al actualizar: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private static string MesNombre(int mes)
+    {
+        string[] nombres = { "Enero","Febrero","Marzo","Abril","Mayo","Junio",
+                             "Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre" };
+        return (mes >= 1 && mes <= 12) ? nombres[mes - 1] : "-";
+    }
+}

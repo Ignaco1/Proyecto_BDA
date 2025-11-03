@@ -1,10 +1,95 @@
 ﻿@page "/objetivosMensuales"
+@using Domain.DTOs.Responses
+@inject IRequestService RequestService
+@inject ISnackbar Snackbar
+@inject NavigationManager Nav
 
-<PageTitle>Objetivos Mensuales</PageTitle>
+<PageTitle>Objetivos mensuales</PageTitle>
 
-<h1>Bienvenido a los objetivos mensuales!</h1>
+<MudStack Class="mb-3" Row="true" Justify="Justify.FlexStart">
+    <MudText Typo="Typo.h5" Class="text-vita-dark fw-bold">
+        Lista de cabañas
+    </MudText>
+</MudStack>
 
+<MudStack Row="true" Class="mb-3" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+    <MudButton Class="btn-vita"
+               Variant="Variant.Filled"
+               StartIcon="@Icons.Material.Filled.ListAlt"
+               OnClick="@(() => Nav.NavigateTo($"/objetivosMensuales/lista"))">
+        Ver objetivos mensuales
+    </MudButton>
+</MudStack>
+
+@if (_cabañas is null)
+{
+    <div class="d-flex justify-center align-center" style="height: 60vh;">
+        <Loading />
+    </div>
+}
+else if (!_cabañas.Any())
+{
+    <MudAlert Severity="Severity.Info" Variant="Variant.Outlined">
+        No hay cabañas registradas en el sistema.
+    </MudAlert>
+}
+else
+{
+    <MudTable Items="_cabañas" Hover="true" Elevation="2" Dense="true">
+        <HeaderContent>
+            <MudTh>Nombre</MudTh>
+            <MudTh>Capacidad</MudTh>
+            <MudTh>Precio por noche</MudTh>
+            <MudTh>Descripción</MudTh>
+            <MudTh>Estado</MudTh>
+            <MudTh Class="col-acciones">Acciones</MudTh>
+        </HeaderContent>
+
+        <RowTemplate>
+            <MudTd DataLabel="Nombre">@context.Nombre</MudTd>
+            <MudTd DataLabel="Capacidad">@context.Capacidad</MudTd>
+            <MudTd DataLabel="Precio">@context.PrecioPorNoche.ToString("C", new System.Globalization.CultureInfo("es-AR"))</MudTd>
+            <MudTd DataLabel="Descripción">@context.Descripcion</MudTd>
+
+            <MudTd DataLabel="Estado">
+                @if (context.IsActive)
+                {
+                    <MudChip T="string" Color="Color.Success" Variant="Variant.Filled" Label="true">Activa</MudChip>
+                }
+                else
+                {
+                    <MudChip T="string" Color="Color.Error" Variant="Variant.Outlined" Label="true">Inactiva</MudChip>
+                }
+            </MudTd>
+            <MudTd Class="col-acciones">
+                <MudButton Variant="Variant.Outlined"
+                           StartIcon="@Icons.Material.Filled.TouchApp"
+                           Class="btn-accion"
+                           OnClick="@(() => IrAAños(context.Id))">
+                    Seleccionar
+                </MudButton>
+            </MudTd>
+        </RowTemplate>
+    </MudTable>
+}
 
 @code {
+    private List<CabañaResponseDto>? _cabañas;
 
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            _cabañas = await RequestService.GetAsync<List<CabañaResponseDto>>("api/cabañas");
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error al cargar las cabañas: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private void IrAAños(int idCabaña)
+    {
+        Nav.NavigateTo($"/objetivosMensuales/{idCabaña}/años");
+    }
 }

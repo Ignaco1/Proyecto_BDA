@@ -1,0 +1,169 @@
+﻿@page "/objetivosMensuales/{idCabaña:int}/{año:int}/meses"
+@using Domain.DTOs.Responses
+@using Domain.DTOs.Requests
+@using Microsoft.AspNetCore.WebUtilities
+@using MudBlazor
+@using Web.Pages.Objetivos.Operaciones
+@inject IRequestService RequestService
+@inject ISnackbar Snackbar
+@inject IDialogService DialogService
+@inject NavigationManager Nav
+
+
+<PageTitle>Objetivos mensuales</PageTitle>
+
+<MudStack Class="mb-3" Row="true" Justify="Justify.FlexStart">
+    <MudText Typo="Typo.h5" Class="text-vita-dark fw-bold">
+        @($"Cabaña {NombreCabaña ?? ""} – {año} – Meses disponibles")
+    </MudText>
+</MudStack>
+
+<MudStack Row="true" Class="mb-3" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+
+    <MudButton Class="btn-vita"
+               Variant="Variant.Filled"
+               StartIcon="@Icons.Material.Filled.ListAlt"
+               OnClick="@(() => Nav.NavigateTo($"/objetivosMensuales/lista"))">
+        Ver objetivos mensuales
+    </MudButton>
+
+    <MudButton Class="btn-vita" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.ArrowBack"
+               OnClick="@VolverAños">
+        Volver a años
+    </MudButton>
+</MudStack>
+
+@if (_mensuales is null)
+{
+    <div class="d-flex justify-center align-center" style="height:60vh;"><Loading /></div>
+}
+else
+{
+    <MudTable Class="table-full" Items="_meses" Hover="true" Dense="true">
+        <HeaderContent>
+            <MudTh>Mes</MudTh>
+            <MudTh>Meta Ocupación %</MudTh>
+            <MudTh> </MudTh>
+            <MudTh Class="col-acciones">Acciones</MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            @{
+                var mes = context;
+                var objetivo = _mensuales.FirstOrDefault(o => o.Mes == mes);
+            }
+            <MudTd>@NombreMes(mes)</MudTd>
+            <MudTd>
+                @(objetivo is null ? (MarkupString)"<em>Sin objetivo</em>" : (MarkupString)$"{objetivo.MetaOcupacion:0.##}%")
+            </MudTd>
+            <MudTd>
+            </MudTd>                                
+            <MudTd Class="col-acciones">
+                @if (objetivo is null)
+                {
+                    <MudButton Variant="Variant.Outlined"
+                               StartIcon="@Icons.Material.Filled.Add"
+                               Class="btn-accion"
+                               OnClick="@(() => OpenAddDialog(mes))">
+                        Nuevo objetivo
+                    </MudButton>
+                }
+                else
+                {
+                    <MudButton Variant="Variant.Outlined"
+                               StartIcon="@Icons.Material.Filled.Edit"
+                               Class="btn-accion"
+                               OnClick="@(() => OpenEditDialog(objetivo))">
+                        Editar
+                    </MudButton>
+                }
+            </MudTd>
+        </RowTemplate>
+    </MudTable>
+}
+
+@code {
+    [Parameter] public int idCabaña { get; set; }
+    [Parameter] public int año { get; set; }
+    [Parameter] public string? NombreCabaña { get; set; }
+
+    private List<ObjetivoResponseDto>? _mensuales;
+    private readonly int[] _meses = Enumerable.Range(1, 12).ToArray();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var uri = Nav.ToAbsoluteUri(Nav.Uri);
+        if (Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query)
+            .TryGetValue("nombreCabaña", out var nombre))
+        {
+            NombreCabaña = nombre;
+        }
+        
+        await CargarMensuales();
+
+    }
+
+    private async Task CargarMensuales()
+    {
+        try
+        {
+            _mensuales = await RequestService.GetAsync<List<ObjetivoResponseDto>>(
+                $"api/objetivos/mensuales/cabaña/{idCabaña}/{año}");
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error al cargar: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private async Task OpenAddDialog(int mes)
+    {
+        var parameters = new DialogParameters
+        {
+            ["IdCabaña"] = idCabaña,
+            ["Año"] = año,
+            ["Mes"] = mes
+        };
+
+        var options = new DialogOptions { CloseButton = true, FullWidth = true, MaxWidth = MaxWidth.ExtraSmall };
+
+        var dialog = await DialogService.ShowAsync<AddObjetivoMensualCabaña>(
+            "Nuevo objetivo mensual", parameters, options);
+
+        var result = await dialog.Result;
+        if (result is { Canceled: false })
+        {
+            Snackbar.Add("Objetivo mensual creado.", Severity.Success);
+            await CargarMensuales();
+        }
+    }
+    
+
+    private async Task OpenEditDialog(ObjetivoResponseDto objetivo)
+    {
+        var parameters = new DialogParameters
+        {
+            ["Objetivo"] = objetivo   
+        };
+
+        var options = new DialogOptions { CloseButton = true, FullWidth = true, MaxWidth = MaxWidth.ExtraSmall };
+
+        var dialog = await DialogService.ShowAsync<EditObjetivoMensualCabaña>(
+            "Editar objetivo mensual", parameters, options);
+
+        var result = await dialog.Result;
+        if (result is { Canceled: false })
+        {
+            Snackbar.Add("Objetivo mensual actualizado.", Severity.Success);
+            await CargarMensuales();
+        }
+    }
+
+
+    private static string NombreMes(int m)
+    {
+        string[] nombres = { "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre" };
+        return nombres[m - 1];
+    }
+
+    private void VolverAños() => Nav.NavigateTo($"/objetivosMensuales/{idCabaña}/años");
+}

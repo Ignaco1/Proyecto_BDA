@@ -1,0 +1,106 @@
+﻿@using Domain.DTOs.Requests
+@using Domain.DTOs.Requests.Objetivo
+@using Domain.Enums
+@inject IRequestService RequestService
+@inject ISnackbar Snackbar
+
+<MudDialog MaxWidth="MaxWidth.ExtraSmall" FullWidth="true">
+    <TitleContent>
+        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
+            <MudIcon Icon="@Icons.Material.Filled.Flag" Class="icon-vita" />
+            <MudText Typo="Typo.h6">Nuevo objetivo mensual</MudText>
+        </MudStack>
+        <MudText Typo="Typo.body2" Class="mt-1">
+            Año: <b>@Año</b> — Mes: <b>@MesNombre(Mes)</b>
+        </MudText>
+    </TitleContent>
+
+    <DialogContent>
+        <MudGrid Spacing="2">
+            <MudItem xs="12">
+                <MudTextField @bind-Value="_dto.MetaOcupacion"
+                              Label="Meta de ocupación (%)"
+                              Variant="Variant.Outlined"
+                              Type="number"
+                              Min="0" Max="100" Step="0.5"
+                              Required="true"
+                              RequiredError="La meta de ocupación es requerida"
+                              HelperText="Ingrese un valor entre 0 y 100" />
+            </MudItem>
+        </MudGrid>
+    </DialogContent>
+
+    <DialogActions>
+        <MudButton Variant="Variant.Text"
+                   OnClick="Cancel"
+                   StartIcon="@Icons.Material.Filled.Cancel">
+            Cancelar
+        </MudButton>
+
+        <MudButton Class="btn-vita"
+                   Variant="Variant.Filled"
+                   StartIcon="@Icons.Material.Filled.Save"
+                   Disabled="@(_dto.MetaOcupacion < 0 || _dto.MetaOcupacion > 100)"
+                   OnClick="Save">
+            Guardar
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] private IMudDialogInstance MudDialog { get; set; } = default!;
+
+    [Parameter] public int IdCabaña { get; set; }
+    [Parameter] public int Año { get; set; }
+    [Parameter] public int Mes { get; set; }
+
+    private AddObjetivoDto _dto = new();
+
+    protected override void OnInitialized()
+    {
+
+        _dto.Tipo = TipoObjetivo.Mensual;  
+        _dto.IdCabaña = IdCabaña;
+        _dto.Año = Año;
+        _dto.Mes = Mes;
+        _dto.MetaOcupacion = 60m;          
+        _dto.IsActive = true;
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+
+    private async Task Save()
+    {
+        try
+        {
+            if (_dto.IdCabaña is null or <= 0)
+            {
+                Snackbar.Add("Cabaña inválida.", Severity.Warning);
+                return;
+            }
+
+            if (_dto.MetaOcupacion < 0 || _dto.MetaOcupacion > 100)
+            {
+                Snackbar.Add("La meta debe estar entre 0 y 100.", Severity.Warning);
+                return;
+            }
+
+            var resp = await RequestService.PostAsync("api/objetivos/mensuales", _dto);
+            if (resp.IsSuccessStatusCode)
+                MudDialog.Close(DialogResult.Ok(true));
+            else
+                Snackbar.Add(await resp.Content.ReadAsStringAsync(), Severity.Error);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error al crear objetivo mensual: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private static string MesNombre(int mes)
+    {
+        string[] nombres = { "Enero","Febrero","Marzo","Abril","Mayo","Junio",
+                             "Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre" };
+        return nombres[Math.Clamp(mes - 1, 0, 11)];
+    }
+}

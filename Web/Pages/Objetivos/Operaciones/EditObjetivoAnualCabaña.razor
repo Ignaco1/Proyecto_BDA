@@ -17,14 +17,20 @@
                 <MudTextField @bind-Value="_dto.Año"
                               Label="Año"
                               Variant="Variant.Outlined"
-                              Type="number" />
+                              Type="number"
+                              Required="true"
+                              RequiredError="El año es requerido"
+                              HelperText="Ej: 2025" />
             </MudItem>
             <MudItem xs="12">
                 <MudTextField @bind-Value="_dto.MetaOcupacion"
                               Label="Meta de ocupación (%)"
                               Variant="Variant.Outlined"
                               Type="number"
-                              Min="0" Max="100" Step="0.5" />
+                              Min="0" Max="100" Step="0.5"
+                              Required="true"
+                              RequiredError="La meta de ocupación es requerida"
+                              HelperText="Ingrese un valor entre 0 y 100" />
             </MudItem>
         </MudGrid>
     </DialogContent>

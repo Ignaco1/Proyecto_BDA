@@ -236,7 +236,6 @@ namespace Business.Services
             if (dto.Mes.HasValue && dto.Mes != entity.Mes)
                 throw new InvalidOperationException("No se puede cambiar el mes en la edición del objetivo mensual.");
 
-            // 🔹 Solo se puede actualizar la meta y el estado
             if (dto.MetaOcupacion.HasValue)
             {
                 var meta = dto.MetaOcupacion.Value;
@@ -256,7 +255,6 @@ namespace Business.Services
             var anuales = await _objetivoRepository.QueryAsync(
                 o => o.Tipo == TipoObjetivo.Anual && o.IdCabaña == idCabaña);
 
-            // Convierte a int (descarta nulos si los hubiera)
             var añosAnuales = anuales
                 .Where(o => o.Año.HasValue)
                 .Select(o => o.Año.Value)
