@@ -44,6 +44,11 @@ namespace Business.Mapping
             CreateMap<AddCancelacionDto, Cancelacion>();
             CreateMap<UpdateCancelacionDto, Cancelacion>()
                 .ForAllMembers(opts => opts.Condition((src, dest, srcMember) => srcMember != null));
+            CreateMap<Cliente, ClienteResponseDto>()
+                .ForMember(d => d.Nombre, opt => opt.MapFrom(s => s.Nombre ?? string.Empty))
+                .ForMember(d => d.Email, opt => opt.MapFrom(s => s.Email ?? string.Empty))
+                .ForMember(d => d.Dni, opt => opt.MapFrom(s => s.Dni ?? string.Empty))
+                .ForMember(d => d.Telefono, opt => opt.MapFrom(s => s.Telefono ?? string.Empty));
 
         }
     }

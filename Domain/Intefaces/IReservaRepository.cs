@@ -16,5 +16,8 @@ namespace Domain.Intefaces
         Task<List<Reserva>> GetReservasActivasAsync();
         Task<List<Reserva>> GetReservasPorCabañaAsync(int idCabaña);
         Task<List<int>> GetAñosPorCabañaAsync(int idCabaña);
+        Task<List<int>> GetAñosConReservasPorCabañaAsync(int idCabaña);
+        Task<List<Reserva>> GetReservasPorCabañaYAñoAsync(int idCabaña, int año);
+
     }
 }

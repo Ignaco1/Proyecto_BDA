@@ -1,0 +1,88 @@
+﻿@page "/ocupacion/{idCabaña:int}/{año:int}/{mes:int}/dias"
+@using Domain.DTOs.Requests.Ocupacion
+@inject IRequestService RequestService
+@inject ISnackbar Snackbar
+@inject NavigationManager Nav
+
+<PageTitle>Ocupación — Días</PageTitle>
+
+<MudStack Class="mb-2" Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+    <MudText Typo="Typo.h5" Class="text-vita-dark fw-bold">
+        @($"Cabaña {NombreCabaña ?? "—"} – {año} / {NombreMes(mes)} – Días")
+    </MudText>
+
+    <MudButton Class="btn-vita" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.ArrowBack"
+               OnClick="@VolverMeses">
+        Volver a meses
+    </MudButton>
+</MudStack>
+
+@if (_dias is null)
+{
+    <div class="d-flex justify-center align-center" style="height:60vh;"><Loading /></div>
+}
+else if (!_dias.Any())
+{
+    <MudAlert Severity="Severity.Info" Variant="Variant.Outlined">Sin datos para este mes.</MudAlert>
+}
+else
+{
+    <MudTable Items="_dias" Hover="true" Dense="true" Class="table-full">
+        <HeaderContent>
+            <MudTh style="width:100px;">Día</MudTh>
+            <MudTh>Fecha</MudTh>
+            <MudTh>Estado</MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd>@context.Dia</MudTd>
+            <MudTd>@context.Fecha.ToString("dddd dd/MM/yyyy")</MudTd>
+            <MudTd>
+                <MudChip T="string"
+                         Color="@(context.Ocupada ? Color.Success : Color.Error)"
+                         Variant="Variant.Filled"
+                         Label="true"
+                         Class="fw-bold text-white px-4 py-1">
+                    @(context.Ocupada ? "Ocupada" : "Desocupada")
+                </MudChip>
+            </MudTd>
+        </RowTemplate>
+    </MudTable>
+}
+
+@code {
+    [Parameter] public int idCabaña { get; set; }
+    [Parameter] public int año { get; set; }
+    [Parameter] public int mes { get; set; }
+
+    private List<OcupacionDiariaDto>? _dias;
+    private string? NombreCabaña;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var uri = Nav.ToAbsoluteUri(Nav.Uri);
+            if (Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query)
+                .TryGetValue("nombreCabaña", out var nombre))
+            {
+                NombreCabaña = nombre;
+            }
+
+            _dias = await RequestService.GetAsync<List<OcupacionDiariaDto>>(
+                $"api/ocupacion/cabaña/{idCabaña}/diaria/{año}/{mes}");
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private void VolverMeses() =>
+        Nav.NavigateTo($"/ocupacion/{idCabaña}/{año}/meses?nombreCabaña={NombreCabaña}");
+
+    private static string NombreMes(int m)
+    {
+        string[] nombres = { "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre" };
+        return (m >= 1 && m <= 12) ? nombres[m - 1] : $"Mes {m}";
+    }
+}

@@ -1,0 +1,89 @@
+﻿@page "/clientes"
+@using Domain.DTOs.Responses
+@inject IRequestService RequestService
+@inject ISnackbar Snackbar
+@inject NavigationManager Nav
+
+<PageTitle>Clientes</PageTitle>
+
+<MudStack Class="mb-3" Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+    <MudText Typo="Typo.h5" Class="text-vita-dark fw-bold">Listado de clientes</MudText>
+    <MudTextField @bind-Value="_search"
+                  Placeholder="Buscar por nombre, email o DNI…"
+                  Variant="Variant.Outlined"
+                  Adornment="Adornment.Start"
+                  AdornmentIcon="@Icons.Material.Filled.Search"
+                  Dense="true"
+                  Immediate="true"
+                  Class="w-64" />
+</MudStack>
+
+@if (_clientes is null)
+{
+    <div class="d-flex justify-center align-center" style="height:60vh;"><Loading /></div>
+}
+else if (!_clientes.Any())
+{
+    <MudAlert Severity="Severity.Info" Variant="Variant.Outlined">
+        No hay clientes registrados.
+    </MudAlert>
+}
+else
+{
+    <MudTable Items="_filtered" Hover="true" Dense="true">
+        <HeaderContent>
+            <MudTh>Nombre</MudTh>
+            <MudTh>Email</MudTh>
+            <MudTh>DNI</MudTh>
+            <MudTh>Teléfono</MudTh>
+            <MudTh>Estado</MudTh>
+        </HeaderContent>
+
+        <RowTemplate>
+            <MudTd DataLabel="Nombre">@context.Nombre</MudTd>
+            <MudTd DataLabel="Email">@context.Email</MudTd>
+            <MudTd DataLabel="DNI">@context.Dni</MudTd>
+            <MudTd DataLabel="Teléfono">@context.Telefono</MudTd>
+            <MudTd DataLabel="Estado">
+                @if (context.IsActive)
+                {
+                    <MudChip T="string" Color="Color.Success" Variant="Variant.Filled" Label="true">Activo</MudChip>
+                }
+                else
+                {
+                    <MudChip T="string" Color="Color.Error" Variant="Variant.Outlined" Label="true">Inactivo</MudChip>
+                }
+            </MudTd>
+        </RowTemplate>
+
+        <PagerContent>
+            <MudTablePager />
+        </PagerContent>
+    </MudTable>
+}
+
+@code {
+    private List<ClienteResponseDto>? _clientes;
+    private string? _search;
+
+    private IEnumerable<ClienteResponseDto> _filtered =>
+        string.IsNullOrWhiteSpace(_search)
+            ? _clientes!
+            : _clientes!.Where(c =>
+                   (c.Nombre ?? string.Empty).Contains(_search, StringComparison.OrdinalIgnoreCase) ||
+                   (c.Email ?? string.Empty).Contains(_search, StringComparison.OrdinalIgnoreCase) ||
+                   (c.Dni ?? string.Empty).Contains(_search, StringComparison.OrdinalIgnoreCase));
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            _clientes = await RequestService.GetAsync<List<ClienteResponseDto>>("api/clientes");
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error al cargar clientes: {ex.Message}", Severity.Error);
+            _clientes = new();
+        }
+    }
+}

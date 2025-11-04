@@ -1,0 +1,105 @@
+﻿@page "/ocupacion/{idCabaña:int}/años"
+@using Domain.DTOs.Requests.Ocupacion
+@inject IRequestService RequestService
+@inject ISnackbar Snackbar
+@inject NavigationManager Nav
+
+<PageTitle>Ocupación — Años</PageTitle>
+
+<MudStack Class="mb-2" Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+    <MudText Typo="Typo.h5" Class="text-vita-dark fw-bold">
+        @($"Cabaña {_cabaña?.Nombre ?? "—"} – Años con reservas")
+    </MudText>
+    <MudButton Class="btn-vita" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.ArrowBack"
+               OnClick="@(() => Nav.NavigateTo("/ocupacion"))">
+        Volver a cabañas
+    </MudButton>
+</MudStack>
+
+@if (_anuales is null)
+{
+    <div class="d-flex justify-center align-center" style="height:60vh;"><Loading /></div>
+}
+else if (!_anuales.Any())
+{
+    <MudAlert Severity="Severity.Info" Variant="Variant.Outlined">No hay años con reservas.</MudAlert>
+}
+else
+{
+    <MudTable Class="table-full" Items="_anuales" Hover="true" Dense="true">
+        <HeaderContent>
+            <MudTh style="width:120px;">Año</MudTh>
+            <MudTh>Ocupacion %</MudTh>
+            <MudTh>Objetivo anual %</MudTh>
+            <MudTh>Noches reservadas</MudTh>
+            <MudTh>Noches disponibles</MudTh>
+            <MudTh class="col-acciones">Acciones</MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd>@context.Año</MudTd>
+            <MudTd>
+                <MudChip T="string"
+                         Color="@(context.Semaforo == "Verde" ? Color.Success :
+                                               context.Semaforo == "Naranja" ? Color.Warning : Color.Error)"
+                     Variant="Variant.Filled"
+                     Label="true"
+                     Class="fw-bold text-white px-4 py-1"
+                     Size="Size.Medium">
+                @($"{context.PorcentajeOcupacion:0.##}%")
+            </MudChip>
+        </MudTd>
+            <MudTd>@(context.MetaObjetivoAnual?.ToString("0.##") + "%" ?? "-")</MudTd>
+            <MudTd>@context.NochesReservadas</MudTd>
+            <MudTd>@context.NochesDisponibles</MudTd>
+            <MudTd class="col-acciones">
+                <MudButton Variant="Variant.Outlined"
+                           StartIcon="@Icons.Material.Filled.TouchApp"
+                           OnClick="@(() => Nav.NavigateTo($"/ocupacion/{idCabaña}/{context.Año}/meses?nombreCabaña={_cabaña?.Nombre}"))">
+                    Seleccionar
+                </MudButton>
+            </MudTd>
+        </RowTemplate>
+    </MudTable>
+}
+
+
+@code {
+    [Parameter] public int idCabaña { get; set; }
+    private CabañaResponseDto? _cabaña;
+    private List<OcupacionAnualDto>? _anuales;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var cabs = await RequestService.GetAsync<List<CabañaResponseDto>>("api/cabañas");
+            _cabaña = cabs?.FirstOrDefault(c => c.Id == idCabaña);
+
+            try
+            {
+                _anuales = await RequestService.GetAsync<List<OcupacionAnualDto>>(
+                    $"api/ocupacion/cabana/{idCabaña}/anual"); 
+            }
+            catch (HttpRequestException ex)
+            {
+                Snackbar.Add($"HTTP: {ex.Message}", Severity.Error);
+            }
+            catch (Exception ex)
+            {
+                Snackbar.Add($"Error: {ex.Message}", Severity.Error);
+            }
+        }
+        catch (Exception ex) { Snackbar.Add($"Error: {ex.Message}", Severity.Error); }
+    }
+
+    private RenderFragment SemaforoChip(string s) => builder =>
+    {
+        var color = s == "Verde" ? Color.Success : s == "Naranja" ? Color.Warning : Color.Error;
+        builder.OpenComponent<MudChip<string>>(0);
+        builder.AddAttribute(1, "Color", color);
+        builder.AddAttribute(2, "Variant", Variant.Filled);
+        builder.AddAttribute(3, "Label", true);
+        builder.AddAttribute(4, "ChildContent", (RenderFragment)(b => b.AddContent(5, s)));
+        builder.CloseComponent();
+    };
+}

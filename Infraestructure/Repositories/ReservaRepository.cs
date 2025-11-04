@@ -75,5 +75,29 @@ namespace Infraestructure.Repositories
             _context.Reservas.Update(reserva);
             await _context.SaveChangesAsync();
         }
+
+        public async Task<List<int>> GetAñosConReservasPorCabañaAsync(int idCabaña)
+        {
+            return await _context.Reservas
+                .Where(r => r.IdCabaña == idCabaña && r.Estado != EstadosReserva.Cancelada)
+                .SelectMany(r => new[] { r.FechaEntrada.Year, r.FechaSalida.Year })
+                .Distinct()
+                .OrderBy(a => a)
+                .ToListAsync();
+        }
+
+        public async Task<List<Reserva>> GetReservasPorCabañaYAñoAsync(int idCabaña, int año)
+        {
+            var inicio = new DateTime(año, 1, 1);
+            var finExcl = new DateTime(año + 1, 1, 1);
+
+            return await _context.Reservas
+                .Include(r => r.Cabaña)
+                .Where(r => r.IdCabaña == idCabaña
+                         && r.Estado != EstadosReserva.Cancelada
+                         && r.FechaEntrada < finExcl
+                         && r.FechaSalida > inicio)
+                .ToListAsync();
+        }
     }
 }

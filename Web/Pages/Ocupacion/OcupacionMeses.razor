@@ -1,0 +1,101 @@
+﻿@page "/ocupacion/{idCabaña:int}/{año:int}/meses"
+@using Domain.DTOs.Requests.Ocupacion
+@inject IRequestService RequestService
+@inject ISnackbar Snackbar
+@inject NavigationManager Nav
+
+<PageTitle>Ocupación — Meses</PageTitle>
+
+<MudStack Class="mb-2" Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+    <MudText Typo="Typo.h5" Class="text-vita-dark fw-bold">
+        @($"Cabaña {NombreCabaña ?? "—"} – {año} – Meses")
+    </MudText>
+    <MudButton Class="btn-vita" Variant="Variant.Filled"
+               StartIcon="@Icons.Material.Filled.ArrowBack" OnClick="@VolverAños">
+        Volver a años
+    </MudButton>
+</MudStack>
+
+@if (_mensual is null)
+{
+    <div class="d-flex justify-center align-center" style="height:60vh;"><Loading /></div>
+}
+else
+{
+    <MudTable Class="table-full" Items="_mensual" Hover="true" Dense="true">
+        <HeaderContent>
+            <MudTh>Mes</MudTh>
+            <MudTh>Ocupacion %</MudTh>
+            <MudTh>Objetivo mensual %</MudTh>
+            <MudTh>Noches reservadas</MudTh>
+            <MudTh>Noches disponibles</MudTh>
+            <MudTh class="col-acciones">Acciones</MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd>@NombreMes(context.Mes)</MudTd>
+            <MudTd>
+                <MudChip T="string"
+                         Color="@(context.Semaforo == "Verde" ? Color.Success :
+                                               context.Semaforo == "Naranja" ? Color.Warning : Color.Error)"
+                     Variant="Variant.Filled"
+                     Label="true"
+                     Class="fw-bold text-white px-4 py-1"
+                     Size="Size.Medium">
+                @($"{context.PorcentajeOcupacion:0.##}%")
+            </MudChip>
+        </MudTd>
+            <MudTd>@(context.MetaObjetivo?.ToString("0.##") + "%" ?? "-")</MudTd>
+            <MudTd>@context.NochesReservadas</MudTd>
+            <MudTd>@context.NochesDisponibles</MudTd>
+        <MudTd class="col-acciones">
+            <MudButton Variant="Variant.Outlined"
+                       StartIcon="@Icons.Material.Filled.CalendarMonth"
+                       OnClick="@(() => Nav.NavigateTo($"/ocupacion/{idCabaña}/{año}/{context.Mes}/dias?nombreCabaña={NombreCabaña}"))">
+                Seleccionar
+            </MudButton>
+        </MudTd>
+        </RowTemplate>
+    </MudTable>
+}
+
+@code {
+    [Parameter] public int idCabaña { get; set; }
+    [Parameter] public int año { get; set; }
+
+    private List<OcupacionMensualDto>? _mensual;
+    private string? NombreCabaña;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var uri = Nav.ToAbsoluteUri(Nav.Uri);
+        var qp = Microsoft.AspNetCore.WebUtilities.QueryHelpers.ParseQuery(uri.Query);
+        if (qp.TryGetValue("nombreCabaña", out var val)) NombreCabaña = val;
+
+        try
+        {
+            _mensual = await RequestService.GetAsync<List<OcupacionMensualDto>>(
+                $"api/ocupacion/cabana/{idCabaña}/mensual/{año}");
+        }
+        catch (Exception ex) { Snackbar.Add($"Error: {ex.Message}", Severity.Error); }
+    }
+
+    private void VolverAños() => Nav.NavigateTo($"/ocupacion/{idCabaña}/años");
+
+    private static string NombreMes(int m)
+    {
+        string[] n = { "Enero","Febrero","Marzo","Abril","Mayo","Junio",
+                       "Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre" };
+        return n[m - 1];
+    }
+
+    private RenderFragment SemaforoChip(string s) => builder =>
+    {
+        var color = s == "Verde" ? Color.Success : s == "Naranja" ? Color.Warning : Color.Error;
+        builder.OpenComponent<MudChip<string>>(0);
+        builder.AddAttribute(1, "Color", color);
+        builder.AddAttribute(2, "Variant", Variant.Filled);
+        builder.AddAttribute(3, "Label", true);
+        builder.AddAttribute(4, "ChildContent", (RenderFragment)(b => b.AddContent(5, s)));
+        builder.CloseComponent();
+    };
+}

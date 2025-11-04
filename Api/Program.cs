@@ -21,8 +21,6 @@ namespace Api
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
-
             //automapper
             builder.Services.AddAutoMapper(cfg => cfg.AddProfile<MappingProfile>());
 
@@ -37,6 +35,7 @@ namespace Api
             builder.Services.AddScoped<ICabañaRepository, CabañaRepository>();
             builder.Services.AddScoped<IReservaRepository, ReservaRepository>();
             builder.Services.AddScoped<ICancelacionRepository, CancelacionRepository>();
+            builder.Services.AddScoped<IClienteRepository, ClienteRepository>();
 
             //services
             builder.Services.AddScoped<IAuthService, AuthService>();
@@ -45,6 +44,8 @@ namespace Api
             builder.Services.AddScoped<ICabañaService, CabañaService>();
             builder.Services.AddScoped<IReservaService, ReservaService>();
             builder.Services.AddScoped<ICancelacionService, CancelacionService>();
+            builder.Services.AddScoped<IOcupacionService, OcupacionService>();
+            builder.Services.AddScoped<IClienteService, ClienteService>();
 
             //autenticacion
             var key = builder.Configuration["Jwt:key"];
@@ -127,6 +128,7 @@ namespace Api
                 app.MapOpenApi();
                 app.UseSwagger();
                 app.UseSwaggerUI();
+                app.UseDeveloperExceptionPage();
             }
 
             app.UseHttpsRedirection();
